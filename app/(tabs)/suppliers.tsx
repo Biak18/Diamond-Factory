@@ -8,8 +8,10 @@ import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Animated,
   FlatList,
   Modal,
+  PanResponder,
   Pressable,
   RefreshControl,
   Text,
@@ -64,6 +66,38 @@ function AddSupplierModal({
     onClose();
   };
 
+  const translateY = useRef(new Animated.Value(0)).current;
+
+  const panResponder = PanResponder.create({
+    onStartShouldSetPanResponder: () => true,
+    onPanResponderMove: (_, gestureState) => {
+      // Only allow dragging down
+      if (gestureState.dy > 0) {
+        translateY.setValue(gestureState.dy);
+      }
+    },
+    onPanResponderRelease: (_, gestureState) => {
+      if (gestureState.dy > 300) {
+        Animated.timing(translateY, {
+          toValue: 500,
+          duration: 200,
+          useNativeDriver: true,
+        }).start(() => {
+          setTimeout(() => {
+            translateY.setValue(0); // reset after went off
+          }, 100);
+          handleClose();
+        });
+      } else {
+        // Snap back
+        Animated.spring(translateY, {
+          toValue: 0,
+          useNativeDriver: true,
+        }).start();
+      }
+    },
+  });
+
   return (
     <Modal
       visible={visible}
@@ -74,9 +108,19 @@ function AddSupplierModal({
       <View className="flex-1 justify-end">
         <Pressable className="flex-1" onPress={handleClose} />
 
-        <View className="bg-white rounded-t-3xl px-6 pt-4 pb-10">
+        <Animated.View
+          style={{
+            transform: [{ translateY }],
+          }}
+          className="bg-white rounded-t-3xl px-6 pt-4 pb-10"
+        >
           {/* Handle bar */}
-          <Pressable className="w-12 h-1 bg-gray-200 rounded-full self-center mb-5" />
+          <View
+            {...panResponder.panHandlers}
+            className="w-full h-12 absolute top-0 self-center"
+          >
+            <View className="w-12 h-1 bg-gray-200 rounded-full self-center" />
+          </View>
 
           {/* Title */}
           <View className="flex-row items-center justify-between mb-6">
@@ -89,7 +133,6 @@ function AddSupplierModal({
           <KeyboardAwareScrollView
             enableOnAndroid={true}
             enableAutomaticScroll={true}
-            extraScrollHeight={80}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
@@ -145,7 +188,7 @@ function AddSupplierModal({
               text="Save Supplier"
             />
           </KeyboardAwareScrollView>
-        </View>
+        </Animated.View>
       </View>
     </Modal>
   );
@@ -243,7 +286,11 @@ export default function SuppliersScreen() {
               {suppliers.length !== 1 ? "s" : ""} total
             </Text>
           </View>
-          <IconButton icon="add" onClick={() => setModalVisible(true)} />
+          <IconButton
+            icon="add"
+            iconColor="white"
+            onClick={() => setModalVisible(true)}
+          />
         </View>
 
         {/* Search */}
