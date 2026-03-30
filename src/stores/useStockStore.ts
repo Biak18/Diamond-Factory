@@ -1,42 +1,32 @@
 import { supabase } from "@/src/lib/supabase";
 import { create } from "zustand";
 
-export interface StockSummary {
-  warehouse_id: string;
-  wh_code: string;
-  wh_name: string;
-  item_id: string;
-  item_code: string;
-  item_name: string;
-  total_in: number;
-  total_out: number;
-  current_stock: number;
-}
-
-export interface WarehouseStock {
-  warehouse_id: string;
-  wh_code: string;
-  wh_name: string;
-  items: StockSummary[];
-  totalItems: number;
-  totalStock: number;
+export interface PackageStock {
+  package_id: string;
+  package_code: string;
+  package_name: string;
+  sieve_from?: string;
+  sieve_to?: string;
+  total_in_ct: number;
+  total_out_ct: number;
+  current_stock_ct: number;
 }
 
 interface StockState {
-  summary: StockSummary[];
+  packageStock: PackageStock[];
   isLoading: boolean;
-  fetchSummary: () => Promise<void>;
+  fetchPackageStock: () => Promise<void>;
   subscribeToTransactions: () => () => void;
 }
 
 export const useStockStore = create<StockState>((set, get) => ({
-  summary: [],
+  packageStock: [],
   isLoading: false,
 
-  fetchSummary: async () => {
+  fetchPackageStock: async () => {
     set({ isLoading: true });
-    const { data, error } = await supabase.from("stock_summary").select("*");
-    if (!error && data) set({ summary: data });
+    const { data, error } = await supabase.from("stock_by_package").select("*");
+    if (!error && data) set({ packageStock: data });
     set({ isLoading: false });
   },
 
@@ -48,11 +38,11 @@ export const useStockStore = create<StockState>((set, get) => ({
         {
           event: "*", // INSERT, UPDATE, DELETE
           schema: "public",
-          table: "stock_transactions",
+          table: "purchases",
         },
         (_payload) => {
-          // Refetch summary whenever any transaction changes
-          get().fetchSummary();
+          // Refetch package stock whenever any purchase transaction changes
+          get().fetchPackageStock();
         },
       )
       .subscribe();

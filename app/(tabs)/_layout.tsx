@@ -20,29 +20,29 @@ const tabs: TabConfig[] = [
     activeIcon: "home",
   },
   {
-    name: "items",
-    title: "Items",
-    icon: "cube-outline",
-    activeIcon: "cube",
+    name: "purchases",
+    title: "Purchases",
+    icon: "cart-outline",
+    activeIcon: "cart",
   },
   {
-    name: "warehouses",
-    title: "Warehouses",
-    icon: "business-outline",
-    activeIcon: "business",
+    name: "suppliers",
+    title: "Suppliers",
+    icon: "people-outline",
+    activeIcon: "people",
   },
   {
-    name: "transactions",
-    title: "Transactions",
-    icon: "swap-horizontal-outline",
-    activeIcon: "swap-horizontal",
+    name: "packages",
+    title: "Packages",
+    icon: "layers-outline",
+    activeIcon: "layers",
   },
-  {
-    name: "profile",
-    title: "Profile",
-    icon: "person-outline",
-    activeIcon: "person",
-  },
+  // {
+  //   name: "profile",
+  //   title: "Profile",
+  //   icon: "person-outline",
+  //   activeIcon: "person",
+  // },
 ];
 
 export default function TabsLayout() {

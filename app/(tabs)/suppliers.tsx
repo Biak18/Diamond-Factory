@@ -1,10 +1,9 @@
-import { TAB_BAR_HEIGHT } from "@/src/constants/layout";
-import { showConfirm, showMessage } from "@/src/lib/utils/dialog";
-import { useWarehouseStore } from "@/src/stores/useWarehouseStore";
+import { Supplier, useSupplierStore } from "@/src/stores/useSupplierStore";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   Modal,
   Pressable,
@@ -16,54 +15,47 @@ import {
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
-//  Add Warehouse Modal
-function AddWarehouseModal({
+// ─── Add Supplier Modal ───────────────────────────────────────────
+function AddSupplierModal({
   visible,
   onClose,
 }: {
   visible: boolean;
   onClose: () => void;
 }) {
-  const { addWarehouse } = useWarehouseStore();
-  const [whCode, setWhCode] = useState("");
-  const [whName, setWhName] = useState("");
+  const { addSupplier } = useSupplierStore();
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [companyName, setCompanyName] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const nameRef = useRef<TextInput>(null);
+  const phoneRef = useRef<TextInput>(null);
+  const companyRef = useRef<TextInput>(null);
 
   const handleSave = async () => {
-    if (!whCode.trim()) {
-      showMessage("Please enter a warehouse code.", "warning");
-      return;
-    }
-    if (!whName.trim()) {
-      showMessage("Please enter a warehouse name.", "warning");
+    if (!name.trim()) {
+      Alert.alert("Missing Info", "Please enter supplier name.");
       return;
     }
     setSaving(true);
     try {
-      await addWarehouse({
-        wh_code: whCode.trim().toUpperCase(),
-        wh_name: whName.trim(),
+      await addSupplier({
+        name: name.trim(),
+        phone: phone.trim() || undefined,
+        company_name: companyName.trim() || undefined,
       });
-      setWhCode("");
-      setWhName("");
-      onClose();
+      handleClose();
     } catch (err: any) {
-      showMessage(
-        err?.message?.includes("unique")
-          ? "Warehouse code already exists."
-          : err?.message || "Could not save warehouse.",
-        "error",
-      );
+      Alert.alert("Error", err?.message || "Could not save supplier.");
     } finally {
       setSaving(false);
     }
   };
 
   const handleClose = () => {
-    setWhCode("");
-    setWhName("");
+    setName("");
+    setPhone("");
+    setCompanyName("");
     onClose();
   };
 
@@ -81,11 +73,9 @@ function AddWarehouseModal({
           {/* Handle bar */}
           <View className="w-12 h-1 bg-gray-200 rounded-full self-center mb-5" />
 
-          {/* Title row */}
+          {/* Title */}
           <View className="flex-row items-center justify-between mb-6">
-            <Text className="text-xl font-bold text-dark">
-              Add New Warehouse
-            </Text>
+            <Text className="text-xl font-bold text-dark">Add Supplier</Text>
             <TouchableOpacity onPress={handleClose}>
               <Ionicons name="close-circle-outline" size={28} color="#94A3B8" />
             </TouchableOpacity>
@@ -98,44 +88,64 @@ function AddWarehouseModal({
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
-            {/* Warehouse Code */}
+            {/* Name */}
             <Text className="text-sm font-medium text-dark mb-2">
-              Warehouse Code <Text className="text-red-400">*</Text>
+              Name <Text className="text-red-400">*</Text>
             </Text>
             <View className="flex-row items-center bg-surface border border-gray-200 rounded-xl px-4 h-14 mb-4">
-              <Ionicons name="code-slash-outline" size={20} color="#2563EB" />
+              <Ionicons name="person-outline" size={20} color="#2563EB" />
               <TextInput
                 className="flex-1 ml-3 text-base text-dark"
-                placeholder="e.g. WH-001"
+                placeholder="e.g. John Smith"
                 placeholderTextColor="#9CA3AF"
-                value={whCode}
-                onChangeText={setWhCode}
-                autoCapitalize="characters"
+                value={name}
+                onChangeText={setName}
+                autoCapitalize="words"
                 returnKeyType="next"
-                onSubmitEditing={() => nameRef.current?.focus()}
+                onSubmitEditing={() => phoneRef.current?.focus()}
               />
             </View>
 
-            {/* Warehouse Name */}
+            {/* Phone */}
             <Text className="text-sm font-medium text-dark mb-2">
-              Warehouse Name <Text className="text-red-400">*</Text>
+              Phone <Text className="text-dark/30 font-normal">(optional)</Text>
+            </Text>
+            <View className="flex-row items-center bg-surface border border-gray-200 rounded-xl px-4 h-14 mb-4">
+              <Ionicons name="call-outline" size={20} color="#2563EB" />
+              <TextInput
+                ref={phoneRef}
+                className="flex-1 ml-3 text-base text-dark"
+                placeholder="e.g. +91 9876543210"
+                placeholderTextColor="#9CA3AF"
+                value={phone}
+                onChangeText={setPhone}
+                keyboardType="phone-pad"
+                returnKeyType="next"
+                onSubmitEditing={() => companyRef.current?.focus()}
+              />
+            </View>
+
+            {/* Company Name */}
+            <Text className="text-sm font-medium text-dark mb-2">
+              Company Name{" "}
+              <Text className="text-dark/30 font-normal">(optional)</Text>
             </Text>
             <View className="flex-row items-center bg-surface border border-gray-200 rounded-xl px-4 h-14 mb-8">
               <Ionicons name="business-outline" size={20} color="#2563EB" />
               <TextInput
-                ref={nameRef}
+                ref={companyRef}
                 className="flex-1 ml-3 text-base text-dark"
-                placeholder="e.g. Main Storage"
+                placeholder="e.g. Diamond Trading Co."
                 placeholderTextColor="#9CA3AF"
-                value={whName}
-                onChangeText={setWhName}
+                value={companyName}
+                onChangeText={setCompanyName}
                 autoCapitalize="words"
                 returnKeyType="done"
                 onSubmitEditing={handleSave}
               />
             </View>
 
-            {/* Save Button */}
+            {/* Save */}
             <TouchableOpacity
               className={`h-14 rounded-xl items-center justify-center ${
                 saving ? "bg-primary/60" : "bg-primary"
@@ -148,7 +158,7 @@ function AddWarehouseModal({
                 <ActivityIndicator color="white" />
               ) : (
                 <Text className="text-white text-base font-bold">
-                  Save Warehouse
+                  Save Supplier
                 </Text>
               )}
             </TouchableOpacity>
@@ -159,78 +169,83 @@ function AddWarehouseModal({
   );
 }
 
-//  Warehouse Card
-function WarehouseCard({
-  warehouse,
+// ─── Supplier Card ────────────────────────────────────────────────
+function SupplierCard({
+  supplier,
   onDelete,
 }: {
-  warehouse: { id: string; wh_code: string; wh_name: string };
+  supplier: Supplier;
   onDelete: (id: string) => void;
 }) {
   const handleDelete = () => {
-    showConfirm(
-      `Are you sure you want to delete "${warehouse.wh_name}"?`,
-      () => onDelete(warehouse.id),
-      {
-        confirmText: "Delete",
-      },
+    Alert.alert(
+      "Delete Supplier",
+      `Are you sure you want to delete "${supplier.name}"?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => onDelete(supplier.id),
+        },
+      ],
     );
-
-    // Alert.alert(
-    //   "Delete Warehouse",
-    //   `Are you sure you want to delete "${warehouse.wh_name}"?`,
-    //   [
-    //     { text: "Cancel", style: "cancel" },
-    //     {
-    //       text: "Delete",
-    //       style: "destructive",
-    //       onPress: () => onDelete(warehouse.id),
-    //     },
-    //   ],
-    // );
   };
 
   return (
-    <View className="bg-white rounded-2xl px-4 py-4 mb-3 flex-row items-center shadow-sm">
-      {/* Icon */}
-      <View className="w-12 h-12 rounded-xl bg-primary/10 items-center justify-center mr-4">
-        <Ionicons name="business-outline" size={24} color="#2563EB" />
-      </View>
+    <View className="bg-white rounded-2xl px-4 py-4 mb-3 shadow-sm">
+      <View className="flex-row items-center">
+        {/* Avatar */}
+        <View className="w-12 h-12 rounded-xl bg-primary/10 items-center justify-center mr-4">
+          <Text className="text-lg font-bold text-primary">
+            {supplier.name.charAt(0).toUpperCase()}
+          </Text>
+        </View>
 
-      {/* Info */}
-      <View className="flex-1">
-        <Text className="text-base font-bold text-dark">
-          {warehouse.wh_name}
-        </Text>
-        <Text className="text-sm text-dark/50 mt-0.5">{warehouse.wh_code}</Text>
-      </View>
+        {/* Info */}
+        <View className="flex-1">
+          <Text className="text-base font-bold text-dark">{supplier.name}</Text>
+          {supplier.company_name && (
+            <Text className="text-sm text-dark/50 mt-0.5">
+              {supplier.company_name}
+            </Text>
+          )}
+          {supplier.phone && (
+            <View className="flex-row items-center gap-1 mt-0.5">
+              <Ionicons name="call-outline" size={12} color="#94A3B8" />
+              <Text className="text-sm text-dark/40">{supplier.phone}</Text>
+            </View>
+          )}
+        </View>
 
-      {/* Delete */}
-      <Pressable
-        onPress={handleDelete}
-        className="w-9 h-9 rounded-full bg-red-50 items-center justify-center"
-      >
-        <Ionicons name="trash-outline" size={18} color="#EF4444" />
-      </Pressable>
+        {/* Delete */}
+        <Pressable
+          onPress={handleDelete}
+          className="w-9 h-9 rounded-full bg-red-50 items-center justify-center"
+        >
+          <Ionicons name="trash-outline" size={18} color="#EF4444" />
+        </Pressable>
+      </View>
     </View>
   );
 }
 
-//  Warehouses Screen
-export default function WarehousesScreen() {
-  const { warehouses, isLoading, fetchWarehouses, deleteWarehouse } =
-    useWarehouseStore();
+// ─── Suppliers Screen ─────────────────────────────────────────────
+export default function SuppliersScreen() {
+  const { suppliers, isLoading, fetchSuppliers, deleteSupplier } =
+    useSupplierStore();
   const [modalVisible, setModalVisible] = useState(false);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    fetchWarehouses();
+    fetchSuppliers();
   }, []);
 
-  const filtered = warehouses.filter(
-    (w) =>
-      w.wh_name.toLowerCase().includes(search.toLowerCase()) ||
-      w.wh_code.toLowerCase().includes(search.toLowerCase()),
+  const filtered = suppliers.filter(
+    (s) =>
+      s.name.toLowerCase().includes(search.toLowerCase()) ||
+      s.company_name?.toLowerCase().includes(search.toLowerCase()) ||
+      s.phone?.includes(search),
   );
 
   return (
@@ -239,10 +254,10 @@ export default function WarehousesScreen() {
       <View className="bg-white px-6 pt-14 pb-4 border-b border-gray-100">
         <View className="flex-row items-center justify-between">
           <View>
-            <Text className="text-2xl font-bold text-dark">Warehouses</Text>
+            <Text className="text-2xl font-bold text-dark">Suppliers</Text>
             <Text className="text-sm text-dark/50 mt-0.5">
-              {warehouses.length} warehouse
-              {warehouses.length !== 1 ? "s" : ""} total
+              {suppliers.length} supplier
+              {suppliers.length !== 1 ? "s" : ""} total
             </Text>
           </View>
           <TouchableOpacity
@@ -259,7 +274,7 @@ export default function WarehousesScreen() {
           <Ionicons name="search-outline" size={18} color="#94A3B8" />
           <TextInput
             className="flex-1 ml-2 text-base text-dark"
-            placeholder="Search warehouses..."
+            placeholder="Search suppliers..."
             placeholderTextColor="#9CA3AF"
             value={search}
             onChangeText={setSearch}
@@ -281,38 +296,34 @@ export default function WarehousesScreen() {
         <FlatList
           data={filtered}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{
-            padding: 16,
-            paddingBottom: TAB_BAR_HEIGHT + 20,
-          }}
+          contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
           refreshControl={
             <RefreshControl
               refreshing={isLoading}
-              onRefresh={fetchWarehouses}
+              onRefresh={fetchSuppliers}
               tintColor="#2563EB"
             />
           }
           renderItem={({ item }) => (
-            <WarehouseCard warehouse={item} onDelete={deleteWarehouse} />
+            <SupplierCard supplier={item} onDelete={deleteSupplier} />
           )}
           ListEmptyComponent={
             <View className="items-center justify-center mt-20">
-              <Ionicons name="business-outline" size={56} color="#CBD5E1" />
+              <Ionicons name="people-outline" size={56} color="#CBD5E1" />
               <Text className="text-lg font-bold text-dark/40 mt-4">
-                {search ? "No warehouses found" : "No warehouses yet"}
+                {search ? "No suppliers found" : "No suppliers yet"}
               </Text>
               <Text className="text-sm text-dark/30 mt-1">
                 {search
                   ? "Try a different search"
-                  : "Tap + to add your first warehouse"}
+                  : "Tap + to add your first supplier"}
               </Text>
             </View>
           }
         />
       )}
 
-      {/* Modal */}
-      <AddWarehouseModal
+      <AddSupplierModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
       />
