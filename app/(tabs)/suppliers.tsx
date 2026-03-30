@@ -1,3 +1,7 @@
+import { IconButton } from "@/src/components/IconButton";
+import { SearchBar } from "@/src/components/SearchBar";
+import { TextBox, TextBoxRef } from "@/src/components/TextBox";
+import { TextButton } from "@/src/components/TextButton";
 import { Supplier, useSupplierStore } from "@/src/stores/useSupplierStore";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useRef, useState } from "react";
@@ -29,6 +33,7 @@ function AddSupplierModal({
   const [companyName, setCompanyName] = useState("");
   const [saving, setSaving] = useState(false);
 
+  const nameInputRef = useRef<TextBoxRef>(null);
   const phoneRef = useRef<TextInput>(null);
   const companyRef = useRef<TextInput>(null);
 
@@ -71,7 +76,7 @@ function AddSupplierModal({
 
         <View className="bg-white rounded-t-3xl px-6 pt-4 pb-10">
           {/* Handle bar */}
-          <View className="w-12 h-1 bg-gray-200 rounded-full self-center mb-5" />
+          <Pressable className="w-12 h-1 bg-gray-200 rounded-full self-center mb-5" />
 
           {/* Title */}
           <View className="flex-row items-center justify-between mb-6">
@@ -89,79 +94,56 @@ function AddSupplierModal({
             showsVerticalScrollIndicator={false}
           >
             {/* Name */}
-            <Text className="text-sm font-medium text-dark mb-2">
-              Name <Text className="text-red-400">*</Text>
-            </Text>
-            <View className="flex-row items-center bg-surface border border-gray-200 rounded-xl px-4 h-14 mb-4">
-              <Ionicons name="person-outline" size={20} color="#2563EB" />
-              <TextInput
-                className="flex-1 ml-3 text-base text-dark"
-                placeholder="e.g. John Smith"
-                placeholderTextColor="#9CA3AF"
-                value={name}
-                onChangeText={setName}
-                autoCapitalize="words"
-                returnKeyType="next"
-                onSubmitEditing={() => phoneRef.current?.focus()}
-              />
-            </View>
+            <TextBox
+              ref={nameInputRef}
+              title="Name"
+              nullable={true}
+              icons="person-outline"
+              value={name}
+              onChange={setName}
+              placeholder="e.g. John Smith"
+              placeholderColor="#9CA3AF"
+              returnKeyType="next"
+              onSubmitEditing={() => phoneRef.current?.focus()}
+            />
 
             {/* Phone */}
-            <Text className="text-sm font-medium text-dark mb-2">
-              Phone <Text className="text-dark/30 font-normal">(optional)</Text>
-            </Text>
-            <View className="flex-row items-center bg-surface border border-gray-200 rounded-xl px-4 h-14 mb-4">
-              <Ionicons name="call-outline" size={20} color="#2563EB" />
-              <TextInput
-                ref={phoneRef}
-                className="flex-1 ml-3 text-base text-dark"
-                placeholder="e.g. +91 9876543210"
-                placeholderTextColor="#9CA3AF"
-                value={phone}
-                onChangeText={setPhone}
-                keyboardType="phone-pad"
-                returnKeyType="next"
-                onSubmitEditing={() => companyRef.current?.focus()}
-              />
-            </View>
+            <TextBox
+              ref={nameInputRef}
+              title="Phone"
+              optionalText="(optional)"
+              icons="call-outline"
+              value={phone}
+              onChange={setPhone}
+              placeholder="e.g. +95 9876543210"
+              placeholderColor="#9CA3AF"
+              keyboardType="phone-pad"
+              returnKeyType="next"
+              onSubmitEditing={() => companyRef.current?.focus()}
+            />
 
             {/* Company Name */}
-            <Text className="text-sm font-medium text-dark mb-2">
-              Company Name{" "}
-              <Text className="text-dark/30 font-normal">(optional)</Text>
-            </Text>
-            <View className="flex-row items-center bg-surface border border-gray-200 rounded-xl px-4 h-14 mb-8">
-              <Ionicons name="business-outline" size={20} color="#2563EB" />
-              <TextInput
-                ref={companyRef}
-                className="flex-1 ml-3 text-base text-dark"
-                placeholder="e.g. Diamond Trading Co."
-                placeholderTextColor="#9CA3AF"
-                value={companyName}
-                onChangeText={setCompanyName}
-                autoCapitalize="words"
-                returnKeyType="done"
-                onSubmitEditing={handleSave}
-              />
-            </View>
+            <TextBox
+              ref={nameInputRef}
+              title="Company Name"
+              optionalText="(optional)"
+              icons="business-outline"
+              placeholder="e.g. Diamond Trading Co."
+              placeholderColor="#9CA3AF"
+              value={companyName}
+              onChange={setCompanyName}
+              autoCapitalize="words"
+              returnKeyType="done"
+              onSubmitEditing={handleSave}
+            />
 
             {/* Save */}
-            <TouchableOpacity
-              className={`h-14 rounded-xl items-center justify-center ${
-                saving ? "bg-primary/60" : "bg-primary"
-              }`}
-              onPress={handleSave}
+            <TextButton
+              onClick={handleSave}
               disabled={saving}
-              activeOpacity={0.8}
-            >
-              {saving ? (
-                <ActivityIndicator color="white" />
-              ) : (
-                <Text className="text-white text-base font-bold">
-                  Save Supplier
-                </Text>
-              )}
-            </TouchableOpacity>
+              loading={saving}
+              text="Save Supplier"
+            />
           </KeyboardAwareScrollView>
         </View>
       </View>
@@ -210,12 +192,13 @@ function SupplierCard({
               {supplier.company_name}
             </Text>
           )}
-          {supplier.phone && (
-            <View className="flex-row items-center gap-1 mt-0.5">
-              <Ionicons name="call-outline" size={12} color="#94A3B8" />
-              <Text className="text-sm text-dark/40">{supplier.phone}</Text>
-            </View>
-          )}
+
+          <View className="flex-row items-center gap-1 mt-0.5">
+            <Ionicons name="call-outline" size={12} color="#94A3B8" />
+            <Text className="text-sm text-dark/40">
+              {supplier.phone ?? "Unknow number"}
+            </Text>
+          </View>
         </View>
 
         {/* Delete */}
@@ -260,31 +243,15 @@ export default function SuppliersScreen() {
               {suppliers.length !== 1 ? "s" : ""} total
             </Text>
           </View>
-          <TouchableOpacity
-            className="w-12 h-12 bg-primary rounded-xl items-center justify-center"
-            onPress={() => setModalVisible(true)}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="add" size={28} color="white" />
-          </TouchableOpacity>
+          <IconButton icon="add" onClick={() => setModalVisible(true)} />
         </View>
 
         {/* Search */}
-        <View className="flex-row items-center bg-surface border border-gray-200 rounded-xl px-4 h-12 mt-4">
-          <Ionicons name="search-outline" size={18} color="#94A3B8" />
-          <TextInput
-            className="flex-1 ml-2 text-base text-dark"
-            placeholder="Search suppliers..."
-            placeholderTextColor="#9CA3AF"
-            value={search}
-            onChangeText={setSearch}
-          />
-          {search.length > 0 && (
-            <Pressable onPress={() => setSearch("")}>
-              <Ionicons name="close-circle" size={18} color="#94A3B8" />
-            </Pressable>
-          )}
-        </View>
+        <SearchBar
+          value={search}
+          onChange={setSearch}
+          placeholder="Search suppliers..."
+        />
       </View>
 
       {/* List */}
