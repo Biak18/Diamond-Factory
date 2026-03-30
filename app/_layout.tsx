@@ -19,6 +19,7 @@ export default function RootLayout() {
     Inter_400Regular,
     Inter_500Medium,
     Inter_700Bold,
+    Inter: require("@/assets/fonts/Inter_18pt-Medium.ttf"),
   });
 
   const { session, isLoading, setSession, fetchProfile } = useAuthStore();
