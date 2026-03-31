@@ -11,11 +11,9 @@ import {
   Animated,
   FlatList,
   Modal,
-  PanResponder,
   Pressable,
   RefreshControl,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -36,12 +34,12 @@ function AddSupplierModal({
   const [saving, setSaving] = useState(false);
 
   const nameInputRef = useRef<TextBoxRef>(null);
-  const phoneRef = useRef<TextInput>(null);
-  const companyRef = useRef<TextInput>(null);
+  const phoneRef = useRef<TextBoxRef>(null);
+  const companyRef = useRef<TextBoxRef>(null);
 
   const handleSave = async () => {
     if (!name.trim()) {
-      Alert.alert("Missing Info", "Please enter supplier name.");
+      nameInputRef.current?.setErrorMessage("Please enter supplier name.");
       return;
     }
     setSaving(true);
@@ -52,6 +50,7 @@ function AddSupplierModal({
         company_name: companyName.trim() || undefined,
       });
       handleClose();
+      nameInputRef.current?.removeErrorMessage();
     } catch (err: any) {
       Alert.alert("Error", err?.message || "Could not save supplier.");
     } finally {
@@ -66,37 +65,37 @@ function AddSupplierModal({
     onClose();
   };
 
-  const translateY = useRef(new Animated.Value(0)).current;
+  // const translateY = useRef(new Animated.Value(0)).current;
 
-  const panResponder = PanResponder.create({
-    onStartShouldSetPanResponder: () => true,
-    onPanResponderMove: (_, gestureState) => {
-      // Only allow dragging down
-      if (gestureState.dy > 0) {
-        translateY.setValue(gestureState.dy);
-      }
-    },
-    onPanResponderRelease: (_, gestureState) => {
-      if (gestureState.dy > 300) {
-        Animated.timing(translateY, {
-          toValue: 500,
-          duration: 200,
-          useNativeDriver: true,
-        }).start(() => {
-          setTimeout(() => {
-            translateY.setValue(0); // reset after went off
-          }, 100);
-          handleClose();
-        });
-      } else {
-        // Snap back
-        Animated.spring(translateY, {
-          toValue: 0,
-          useNativeDriver: true,
-        }).start();
-      }
-    },
-  });
+  // const panResponder = PanResponder.create({
+  //   onStartShouldSetPanResponder: () => true,
+  //   onPanResponderMove: (_, gestureState) => {
+  //     // Only allow dragging down
+  //     if (gestureState.dy > 0) {
+  //       translateY.setValue(gestureState.dy);
+  //     }
+  //   },
+  //   onPanResponderRelease: (_, gestureState) => {
+  //     if (gestureState.dy > 300) {
+  //       Animated.timing(translateY, {
+  //         toValue: 500,
+  //         duration: 200,
+  //         useNativeDriver: true,
+  //       }).start(() => {
+  //         setTimeout(() => {
+  //           translateY.setValue(0); // reset after went off
+  //         }, 100);
+  //         handleClose();
+  //       });
+  //     } else {
+  //       // Snap back
+  //       Animated.spring(translateY, {
+  //         toValue: 0,
+  //         useNativeDriver: true,
+  //       }).start();
+  //     }
+  //   },
+  // });
 
   return (
     <Modal
@@ -109,14 +108,14 @@ function AddSupplierModal({
         <Pressable className="flex-1" onPress={handleClose} />
 
         <Animated.View
-          style={{
-            transform: [{ translateY }],
-          }}
+          // style={{
+          //   transform: [{ translateY }],
+          // }}
           className="bg-white rounded-t-3xl px-6 pt-4 pb-10"
         >
           {/* Handle bar */}
           <View
-            {...panResponder.panHandlers}
+            // {...panResponder.panHandlers}
             className="w-full h-12 absolute top-0 self-center"
           >
             <View className="w-12 h-1 bg-gray-200 rounded-full self-center" />
@@ -144,6 +143,7 @@ function AddSupplierModal({
               icons="person-outline"
               value={name}
               onChange={setName}
+              readonly={saving}
               placeholder="e.g. John Smith"
               placeholderColor="#9CA3AF"
               returnKeyType="next"
@@ -152,10 +152,11 @@ function AddSupplierModal({
 
             {/* Phone */}
             <TextBox
-              ref={nameInputRef}
+              ref={phoneRef}
               title="Phone"
               optionalText="(optional)"
               icons="call-outline"
+              readonly={saving}
               value={phone}
               onChange={setPhone}
               placeholder="e.g. +95 9876543210"
@@ -167,7 +168,7 @@ function AddSupplierModal({
 
             {/* Company Name */}
             <TextBox
-              ref={nameInputRef}
+              ref={companyRef}
               title="Company Name"
               optionalText="(optional)"
               icons="business-outline"
@@ -176,6 +177,7 @@ function AddSupplierModal({
               value={companyName}
               onChange={setCompanyName}
               autoCapitalize="words"
+              readonly={saving}
               returnKeyType="done"
               onSubmitEditing={handleSave}
             />
