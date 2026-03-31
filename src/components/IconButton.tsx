@@ -8,12 +8,13 @@ import {
 } from "react-native";
 interface ButtonProps {
   backgroundColor?: string;
-  onClick: () => void;
+  onClick?: () => void;
   loading?: boolean;
   disabled?: boolean;
   style?: StyleProp<ViewStyle>;
   icon: React.ComponentProps<typeof Ionicons>["name"];
   iconColor?: string;
+  size?: number;
 }
 
 export const IconButton = ({
@@ -24,6 +25,7 @@ export const IconButton = ({
   style,
   icon,
   iconColor = "whtie",
+  size = 28,
 }: ButtonProps) => {
   return (
     <Pressable
@@ -32,7 +34,11 @@ export const IconButton = ({
       onPress={onClick}
       style={[
         {
-          backgroundColor: (backgroundColor ?? loading) ? "#7a9eeb" : "#2563EB",
+          backgroundColor: loading
+            ? "#7a9eeb"
+            : backgroundColor
+              ? backgroundColor
+              : "#2563EB",
         },
         style,
       ]}
@@ -40,7 +46,7 @@ export const IconButton = ({
       {loading ? (
         <ActivityIndicator color="white" />
       ) : (
-        <Ionicons name={icon} size={28} color={iconColor} />
+        <Ionicons name={icon} size={size} color={iconColor} />
       )}
     </Pressable>
   );

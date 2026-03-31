@@ -1,3 +1,5 @@
+import { TextBox, TextBoxRef } from "@/src/components/TextBox";
+import { TextButton } from "@/src/components/TextButton";
 import { supabase } from "@/src/lib/supabase";
 import {
   showConfirm as showConfirmMsg,
@@ -5,14 +7,8 @@ import {
 } from "@/src/lib/utils/dialog";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useState } from "react";
-import {
-  ActivityIndicator,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { useRef, useState } from "react";
+import { Text, TouchableOpacity, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -27,24 +23,48 @@ export default function SignUpScreen() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const nameRef = useRef<TextBoxRef>(null);
+  const emailRef = useRef<TextBoxRef>(null);
+  const passRef = useRef<TextBoxRef>(null);
+  const comPassRef = useRef<TextBoxRef>(null);
+
   const handleSignUp = async () => {
     // Basic validation
     if (!name.trim()) {
-      showMessage("Please enter your name.", "warning");
+      nameRef.current?.setErrorMessage("Please enter your name.");
+      expectRemoveMessage("name");
       return;
     }
     if (!email.trim()) {
-      showMessage("Please enter your email.", "warning");
+      emailRef.current?.setErrorMessage("Please enter your email.");
+      expectRemoveMessage("email");
+      return;
+    }
+    if (!password.trim()) {
+      passRef.current?.setErrorMessage("Please enter your password.");
+      expectRemoveMessage("pass");
       return;
     }
     if (password.length < 6) {
-      showMessage("Password must be at least 6 characters.", "warning");
+      passRef.current?.setErrorMessage(
+        "Password must be at least 6 characters.",
+      );
+      expectRemoveMessage("pass");
+      return;
+    }
+    if (!confirmPassword.trim()) {
+      comPassRef.current?.setErrorMessage(
+        "Please enter your confirm password.",
+      );
+      expectRemoveMessage("comPass");
       return;
     }
     if (password !== confirmPassword) {
-      showMessage("Passwords do not match.", "warning");
+      comPassRef.current?.setErrorMessage("Passwords do not match.");
+      expectRemoveMessage("comPass");
       return;
     }
+    expectRemoveMessage("all");
 
     setLoading(true);
     try {
@@ -75,6 +95,44 @@ export default function SignUpScreen() {
     }
   };
 
+  const expectRemoveMessage = (
+    type: "name" | "email" | "pass" | "comPass" | "all",
+  ) => {
+    switch (type) {
+      case "name": {
+        emailRef.current?.removeErrorMessage();
+        passRef.current?.removeErrorMessage();
+        comPassRef.current?.removeErrorMessage();
+        break;
+      }
+      case "email": {
+        nameRef.current?.removeErrorMessage();
+        passRef.current?.removeErrorMessage();
+        comPassRef.current?.removeErrorMessage();
+        break;
+      }
+      case "comPass": {
+        emailRef.current?.removeErrorMessage();
+        passRef.current?.removeErrorMessage();
+        nameRef.current?.removeErrorMessage();
+        break;
+      }
+      case "pass": {
+        emailRef.current?.removeErrorMessage();
+        nameRef.current?.removeErrorMessage();
+        comPassRef.current?.removeErrorMessage();
+        break;
+      }
+      case "all": {
+        passRef.current?.removeErrorMessage();
+        emailRef.current?.removeErrorMessage();
+        nameRef.current?.removeErrorMessage();
+        comPassRef.current?.removeErrorMessage();
+        break;
+      }
+    }
+  };
+
   return (
     <SafeAreaView
       className="flex-1 bg-surface"
@@ -100,125 +158,73 @@ export default function SignUpScreen() {
             </Text>
           </View>
 
-          {/* Form */}
-          <View className="gap-4">
-            {/* Name */}
-            <View>
-              <Text className="text-sm font-medium text-dark mb-2">
-                Full Name
-              </Text>
-              <View className="flex-row items-center bg-white border border-dark/10 rounded-xl px-4 h-14">
-                <Ionicons name="person-outline" size={20} color="#2563EB" />
-                <TextInput
-                  className="flex-1 ml-3 text-base text-dark font-sans"
-                  placeholder="e.g. John Smith"
-                  placeholderTextColor="#94A3B8"
-                  value={name}
-                  onChangeText={setName}
-                  autoCapitalize="words"
-                />
-              </View>
-            </View>
+          {/* Name */}
+          <TextBox
+            ref={nameRef}
+            placeholder="e.g. John Smith"
+            placeholderColor="#94A3B8"
+            value={name}
+            onChange={setName}
+            autoCapitalize="words"
+            icons="person-outline"
+            title="Full Name"
+            style={{ backgroundColor: "white" }}
+          />
 
-            {/* Email */}
-            <View>
-              <Text className="text-sm font-medium text-dark mb-2">
-                Email Address
-              </Text>
-              <View className="flex-row items-center bg-white border border-dark/10 rounded-xl px-4 h-14">
-                <Ionicons name="mail-outline" size={20} color="#2563EB" />
-                <TextInput
-                  className="flex-1 ml-3 text-base text-dark font-sans"
-                  placeholder="you@example.com"
-                  placeholderTextColor="#94A3B8"
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                />
-              </View>
-            </View>
+          {/* Email */}
+          <TextBox
+            ref={emailRef}
+            value={email}
+            onChange={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            placeholder="you@example.com"
+            placeholderColor="#94A3B8"
+            icons="mail-outline"
+            title="Email Address"
+            style={{ backgroundColor: "white" }}
+          />
 
-            {/* Password */}
-            <View>
-              <Text className="text-sm font-medium text-dark mb-2">
-                Password
-              </Text>
-              <View className="flex-row items-center bg-white border border-dark/10 rounded-xl px-4 h-14">
-                <Ionicons
-                  name="lock-closed-outline"
-                  size={20}
-                  color="#2563EB"
-                />
-                <TextInput
-                  className="flex-1 ml-3 text-base text-dark font-sans"
-                  placeholder="Min. 6 characters"
-                  placeholderTextColor="#94A3B8"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry={!showPassword}
-                  autoCapitalize="none"
-                />
-                <TouchableOpacity
-                  onPress={() => setShowPassword(!showPassword)}
-                >
-                  <Ionicons
-                    name={showPassword ? "eye-outline" : "eye-off-outline"}
-                    size={20}
-                    color="#94A3B8"
-                  />
-                </TouchableOpacity>
-              </View>
-            </View>
+          {/* Password */}
+          <TextBox
+            ref={passRef}
+            value={password}
+            onChange={setPassword}
+            secureTextEntry={!showPassword}
+            autoCapitalize="none"
+            placeholder="Min. 6 characters"
+            placeholderColor="#94A3B8"
+            icons="lock-closed-outline"
+            title="Password"
+            eyeIcon
+            eyeIconClick={() => setShowPassword(!showPassword)}
+            eyeIconState={showPassword ? "eye-outline" : "eye-off-outline"}
+            style={{ backgroundColor: "white" }}
+          />
 
-            {/* Confirm Password */}
-            <View>
-              <Text className="text-sm font-medium text-dark mb-2">
-                Confirm Password
-              </Text>
-              <View className="flex-row items-center bg-white border border-dark/10 rounded-xl px-4 h-14">
-                <Ionicons
-                  name="lock-closed-outline"
-                  size={20}
-                  color="#2563EB"
-                />
-                <TextInput
-                  className="flex-1 ml-3 text-base text-dark font-sans"
-                  placeholder="Re-enter your password"
-                  placeholderTextColor="#94A3B8"
-                  value={confirmPassword}
-                  onChangeText={setConfirmPassword}
-                  secureTextEntry={!showConfirm}
-                  autoCapitalize="none"
-                />
-                <TouchableOpacity onPress={() => setShowConfirm(!showConfirm)}>
-                  <Ionicons
-                    name={showConfirm ? "eye-outline" : "eye-off-outline"}
-                    size={20}
-                    color="#94A3B8"
-                  />
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
+          {/* Confirm Password */}
+          <TextBox
+            ref={comPassRef}
+            value={confirmPassword}
+            onChange={setConfirmPassword}
+            secureTextEntry={!showConfirm}
+            autoCapitalize="none"
+            placeholder="Re-enter your password"
+            icons="lock-closed-outline"
+            title="Confrim Password"
+            eyeIcon
+            style={{ backgroundColor: "white" }}
+            eyeIconClick={() => setShowConfirm(!showConfirm)}
+            eyeIconState={showConfirm ? "eye-outline" : "eye-off-outline"}
+          />
 
           {/* Sign Up Button */}
-          <TouchableOpacity
-            className={`mt-8 h-14 rounded-xl items-center justify-center ${
-              loading ? "bg-primary/60" : "bg-primary"
-            }`}
-            onPress={handleSignUp}
+          <TextButton
+            text="Create Account"
+            loading={loading}
+            onClick={handleSignUp}
             disabled={loading}
-            activeOpacity={0.8}
-          >
-            {loading ? (
-              <ActivityIndicator color="white" />
-            ) : (
-              <Text className="text-white text-base font-bold">
-                Create Account
-              </Text>
-            )}
-          </TouchableOpacity>
+          />
 
           {/* Sign In Link */}
           <View className="flex-row justify-center items-center mt-6">

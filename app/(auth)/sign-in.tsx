@@ -1,14 +1,10 @@
+import { TextBox, TextBoxRef } from "@/src/components/TextBox";
+import { TextButton } from "@/src/components/TextButton";
 import { supabase } from "@/src/lib/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
-import { useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { useRef, useState } from "react";
+import { Pressable, Text, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -18,15 +14,19 @@ export default function SignInScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const emailInput = useRef<TextBoxRef>(null);
+  const passInput = useRef<TextBoxRef>(null);
 
   const handleSignIn = async () => {
-    if (!email || !password) {
-      setError("Please fill in all fields.");
+    if (!email) {
+      emailInput.current?.setErrorMessage("Please enter your email here.");
+      return;
+    } else if (!password) {
+      passInput.current?.setErrorMessage("Please enter your password here.");
+      emailInput.current?.removeErrorMessage();
       return;
     }
-
     setLoading(true);
-    setError("");
 
     const { error } = await supabase.auth.signInWithPassword({
       email: email.trim(),
@@ -35,6 +35,8 @@ export default function SignInScreen() {
 
     if (error) setError(error.message);
     console.log("Sign-in error:", error);
+    emailInput.current?.removeErrorMessage();
+    passInput.current?.removeErrorMessage();
     setLoading(false);
   };
 
@@ -64,7 +66,6 @@ export default function SignInScreen() {
 
           <View className="bg-white rounded-3xl p-6 shadow-sm">
             <Text className="text-xl font-bold text-dark mb-6">Sign In</Text>
-
             {error ? (
               <View className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4 flex-row items-center gap-2">
                 <Ionicons
@@ -75,64 +76,44 @@ export default function SignInScreen() {
                 <Text className="text-red-500 text-sm flex-1">{error}</Text>
               </View>
             ) : null}
-
-            <View className="mb-4">
-              <Text className="text-sm font-medium text-dark mb-2">Email</Text>
-              <View className="flex-row items-center bg-surface border border-gray-200 rounded-xl px-4 h-14">
-                <Ionicons name="mail-outline" size={20} color="#6B7280" />
-                <TextInput
-                  className="flex-1 ml-3 text-base text-dark"
-                  placeholder="your@email.com"
-                  placeholderTextColor="#9CA3AF"
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                />
-              </View>
+            {/*Email Input*/}
+            <TextBox
+              ref={emailInput}
+              value={email}
+              readonly={loading}
+              onChange={setEmail}
+              placeholder="your@email.com"
+              placeholderColor="#9CA3AF"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              icons="mail-outline"
+              title="Email"
+              autoCorrect={false}
+            />
+            {/*Password Input*/}
+            <View className="relative w-full">
+              <TextBox
+                ref={passInput}
+                title="Password"
+                icons="lock-closed-outline"
+                value={password}
+                readonly={loading}
+                onChange={setPassword}
+                placeholder="••••••••"
+                placeholderColor="#9CA3AF"
+                secureTextEntry={!showPassword}
+                autoCapitalize="none"
+                eyeIcon
+                eyeIconClick={() => setShowPassword(!showPassword)}
+                eyeIconState={showPassword ? "eye-outline" : "eye-off-outline"}
+              />
             </View>
-
-            <View className="mb-6">
-              <Text className="text-sm font-medium text-dark mb-2">
-                Password
-              </Text>
-              <View className="flex-row items-center bg-surface border border-gray-200 rounded-xl px-4 h-14">
-                <Ionicons
-                  name="lock-closed-outline"
-                  size={20}
-                  color="#6B7280"
-                />
-                <TextInput
-                  className="flex-1 ml-3 text-base text-dark"
-                  placeholder="••••••••"
-                  placeholderTextColor="#9CA3AF"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry={!showPassword}
-                  autoCapitalize="none"
-                />
-                <Pressable onPress={() => setShowPassword(!showPassword)}>
-                  <Ionicons
-                    name={showPassword ? "eye-outline" : "eye-off-outline"}
-                    size={20}
-                    color="#6B7280"
-                  />
-                </Pressable>
-              </View>
-            </View>
-
-            <Pressable
-              onPress={handleSignIn}
+            <TextButton
+              text="Sign In"
+              loading={loading}
+              onClick={handleSignIn}
               disabled={loading}
-              className="bg-primary h-14 rounded-xl items-center justify-center active:opacity-80"
-            >
-              {loading ? (
-                <ActivityIndicator color="white" />
-              ) : (
-                <Text className="text-white text-base font-bold">Sign In</Text>
-              )}
-            </Pressable>
+            />
           </View>
 
           <View className="flex-row justify-center mt-6">
