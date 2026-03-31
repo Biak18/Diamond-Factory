@@ -691,10 +691,10 @@ export default function PurchasesScreen() {
   // Totals
   const totalUSD = purchases
     .filter((p) => p.currency === "USD")
-    .reduce((sum, p) => sum + p.total_price, 0);
+    .reduce((sum, p) => sum + p.price_per_ct, 0);
   const totalINR = purchases
     .filter((p) => p.currency === "INR")
-    .reduce((sum, p) => sum + p.total_price, 0);
+    .reduce((sum, p) => sum + p.price_per_ct, 0);
 
   return (
     <View className="flex-1 bg-surface">
