@@ -168,7 +168,6 @@ export default function SignUpScreen() {
             autoCapitalize="words"
             icons="person-outline"
             title="Full Name"
-            style={{ backgroundColor: "white" }}
           />
 
           {/* Email */}
@@ -182,7 +181,6 @@ export default function SignUpScreen() {
             placeholderColor="#94A3B8"
             icons="mail-outline"
             title="Email Address"
-            style={{ backgroundColor: "white" }}
           />
 
           {/* Password */}
@@ -199,7 +197,6 @@ export default function SignUpScreen() {
             eyeIcon
             eyeIconClick={() => setShowPassword(!showPassword)}
             eyeIconState={showPassword ? "eye-outline" : "eye-off-outline"}
-            style={{ backgroundColor: "white" }}
           />
 
           {/* Confirm Password */}
@@ -213,7 +210,6 @@ export default function SignUpScreen() {
             icons="lock-closed-outline"
             title="Confrim Password"
             eyeIcon
-            style={{ backgroundColor: "white" }}
             eyeIconClick={() => setShowConfirm(!showConfirm)}
             eyeIconState={showConfirm ? "eye-outline" : "eye-off-outline"}
           />
