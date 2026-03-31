@@ -1,10 +1,7 @@
 import { TextBox, TextBoxRef } from "@/src/components/TextBox";
 import { TextButton } from "@/src/components/TextButton";
 import { supabase } from "@/src/lib/supabase";
-import {
-  showConfirm as showConfirmMsg,
-  showMessage,
-} from "@/src/lib/utils/dialog";
+import { showMessage } from "@/src/lib/utils/dialog";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
@@ -81,13 +78,13 @@ export default function SignUpScreen() {
 
       if (error) throw error;
 
-      showConfirmMsg(
-        "Account Created! Your account is ready. Please sign in.",
-        () => router.replace("/(auth)/sign-in"),
-        {
-          confirmText: "Go to Sign In",
-        },
-      );
+      // showConfirmMsg(
+      //   "Account Created! Your account is ready. Please sign in.",
+      //   () => router.replace("/(auth)/sign-in"),
+      //   {
+      //     confirmText: "Go to Sign In",
+      //   },
+      // );
     } catch (err: any) {
       showMessage(err.message || "Could not create account.", "error");
     } finally {
