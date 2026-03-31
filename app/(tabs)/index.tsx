@@ -1,3 +1,4 @@
+import { TAB_BAR_HEIGHT } from "@/src/constants/layout";
 import { useAuthStore } from "@/src/stores/useAuthStore";
 import { PackageStock, useStockStore } from "@/src/stores/useStockStore";
 import { Ionicons } from "@expo/vector-icons";
@@ -205,7 +206,10 @@ export default function HomeScreen() {
         <FlatList
           data={filtered}
           keyExtractor={(item) => item.package_id}
-          contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
+          contentContainerStyle={{
+            padding: 16,
+            paddingBottom: TAB_BAR_HEIGHT + 20,
+          }}
           refreshControl={
             <RefreshControl
               refreshing={isLoading}

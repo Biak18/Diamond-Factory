@@ -2,6 +2,7 @@ import { IconButton } from "@/src/components/IconButton";
 import { SearchBar } from "@/src/components/SearchBar";
 import { TextBox, TextBoxRef } from "@/src/components/TextBox";
 import { TextButton } from "@/src/components/TextButton";
+import { TAB_BAR_HEIGHT } from "@/src/constants/layout";
 import { Supplier, useSupplierStore } from "@/src/stores/useSupplierStore";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useRef, useState } from "react";
@@ -312,7 +313,10 @@ export default function SuppliersScreen() {
         <FlatList
           data={filtered}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
+          contentContainerStyle={{
+            padding: 16,
+            paddingBottom: TAB_BAR_HEIGHT + 20,
+          }}
           refreshControl={
             <RefreshControl
               refreshing={isLoading}

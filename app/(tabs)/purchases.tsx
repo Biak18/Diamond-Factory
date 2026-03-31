@@ -1,6 +1,7 @@
 import { RowPicker, RowPickerRef } from "@/src/components/RowPicker";
 import { TextBox, TextBoxRef } from "@/src/components/TextBox";
 import { TextButton } from "@/src/components/TextButton";
+import { TAB_BAR_HEIGHT } from "@/src/constants/layout";
 import { useAuthStore } from "@/src/stores/useAuthStore";
 import { usePackageStore } from "@/src/stores/usePackageStore";
 import { Purchase, usePurchaseStore } from "@/src/stores/usePurchaseStore";
@@ -246,7 +247,8 @@ function AddPurchaseModal({
       return price * rate; // keep in USD or INR, just show MMK in UI
     }
 
-    return weight * price; // stay in USD or INR
+    // return weight * price; // stay in USD or INR
+    return price; // show price per CT since exchange rate is not provided
   }, [weightCt, pricePerCt, exchangeRate]);
 
   useEffect(() => {
@@ -783,7 +785,10 @@ export default function PurchasesScreen() {
         <FlatList
           data={filtered}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
+          contentContainerStyle={{
+            padding: 16,
+            paddingBottom: TAB_BAR_HEIGHT + 20,
+          }}
           refreshControl={
             <RefreshControl
               refreshing={isLoading}
