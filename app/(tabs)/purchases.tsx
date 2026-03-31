@@ -1,4 +1,4 @@
-import { RowPicker } from "@/src/components/RowPicker";
+import { RowPicker, RowPickerRef } from "@/src/components/RowPicker";
 import { TextBox, TextBoxRef } from "@/src/components/TextBox";
 import { TextButton } from "@/src/components/TextButton";
 import { useAuthStore } from "@/src/stores/useAuthStore";
@@ -229,6 +229,9 @@ function AddPurchaseModal({
   const priceRef = useRef<TextBoxRef>(null);
   const exchangeRef = useRef<TextBoxRef>(null);
 
+  const supplierRef = useRef<RowPickerRef>(null);
+  const packageRef = useRef<RowPickerRef>(null);
+
   // Auto calculate total
 
   const totalPrice = useMemo(() => {
@@ -271,29 +274,43 @@ function AddPurchaseModal({
 
   const handleSave = async () => {
     if (!selectedSupplier) {
-      Alert.alert("Missing Info", "Please select a supplier.");
+      supplierRef.current?.setErrorMessage("Please select a suppiler");
+      packageRef.current?.removeErrorMessage();
       return;
     }
     if (!selectedPackage) {
-      Alert.alert("Missing Info", "Please select a package.");
+      packageRef.current?.setErrorMessage("Please select a package.");
+      supplierRef.current?.removeErrorMessage();
       return;
     }
     if (!weightCt || isNaN(Number(weightCt)) || Number(weightCt) <= 0) {
       weightRef.current?.setErrorMessage("Please enter a valid weight in CT.");
       priceRef.current?.removeErrorMessage();
+      packageRef.current?.removeErrorMessage();
+      supplierRef.current?.removeErrorMessage();
       return;
     }
     if (!pricePerCt || isNaN(Number(pricePerCt)) || Number(pricePerCt) <= 0) {
       priceRef.current?.setErrorMessage("Please enter a valid price per CT.");
       weightRef.current?.removeErrorMessage();
+      packageRef.current?.removeErrorMessage();
+      supplierRef.current?.removeErrorMessage();
       return;
     }
     if (!purchaseDate) {
       Alert.alert("Missing Info", "Please enter a purchase date.");
+      weightRef.current?.removeErrorMessage();
+      priceRef.current?.removeErrorMessage();
+      packageRef.current?.removeErrorMessage();
+      supplierRef.current?.removeErrorMessage();
       return;
     }
     if (!user?.id) {
       Alert.alert("Error", "User session not found.");
+      weightRef.current?.removeErrorMessage();
+      priceRef.current?.removeErrorMessage();
+      packageRef.current?.removeErrorMessage();
+      supplierRef.current?.removeErrorMessage();
       return;
     }
 
@@ -356,6 +373,7 @@ function AddPurchaseModal({
             >
               {/* Supplier */}
               <RowPicker
+                ref={supplierRef}
                 readonly={saving}
                 nullable
                 value={
@@ -374,6 +392,7 @@ function AddPurchaseModal({
 
               {/* Package */}
               <RowPicker
+                ref={packageRef}
                 readonly={saving}
                 nullable
                 value={

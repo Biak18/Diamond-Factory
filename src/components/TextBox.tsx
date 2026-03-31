@@ -59,7 +59,7 @@ export const TextBox = forwardRef<TextBoxRef, TextBoxProps>(
       nullable = false,
       optionalText,
       optionalTextColor = "rgb(15 23 42 / 0.3)",
-      readonly,
+      readonly = false,
       autoCorrect,
       secureTextEntry,
       eyeIcon = false,
@@ -93,60 +93,41 @@ export const TextBox = forwardRef<TextBoxRef, TextBoxProps>(
           className="flex-row items-center border border-gray-200 rounded-xl px-4 gap-2"
         >
           {icons && <Ionicons name={icons} size={20} color="#2563EB" />}
-          {readonly ? (
-            <View className="relative w-full">
-              <Text style={{ fontSize: 16 }}>{placeholder || value}</Text>
-              {eyeIcon && (
-                <IconButton
-                  onClick={eyeIconClick}
-                  size={20}
-                  style={{
-                    position: "absolute",
-                    right: 12,
-                    transform: [{ translateY: -8 }], // ✅ center it
-                  }}
-                  icon={eyeIconState ?? "eye"}
-                  iconColor="#6B7280"
-                  backgroundColor="transparent"
-                />
-              )}
-            </View>
-          ) : (
-            <View className="relative w-full">
-              <TextInput
-                multiline={multiline}
-                numberOfLines={numberOfLines}
-                autoCorrect={autoCorrect}
-                style={style}
-                ref={inputRef}
-                secureTextEntry={secureTextEntry}
-                className="flex-1 text-base text-dark"
-                placeholder={placeholder}
-                placeholderTextColor={placeholderColor}
-                value={value}
-                keyboardType={keyboardType}
-                onChangeText={onChange}
-                autoCapitalize={autoCapitalize}
-                returnKeyType={returnKeyType}
-                onSubmitEditing={onSubmitEditing}
-              />
+          <View className="relative w-full">
+            <TextInput
+              readOnly={readonly}
+              multiline={multiline}
+              numberOfLines={numberOfLines}
+              autoCorrect={autoCorrect}
+              style={style}
+              ref={inputRef}
+              secureTextEntry={secureTextEntry}
+              className="flex-1 text-base text-dark"
+              placeholder={placeholder}
+              placeholderTextColor={readonly ? "white" : placeholderColor}
+              value={value}
+              keyboardType={keyboardType}
+              onChangeText={onChange}
+              autoCapitalize={autoCapitalize}
+              returnKeyType={returnKeyType}
+              onSubmitEditing={onSubmitEditing}
+            />
 
-              {eyeIcon && (
-                <IconButton
-                  onClick={eyeIconClick}
-                  size={20}
-                  style={{
-                    position: "absolute",
-                    right: 12,
-                    transform: [{ translateY: "10%" }], // ✅ center it
-                  }}
-                  icon={eyeIconState ?? "eye"}
-                  iconColor="#6B7280"
-                  backgroundColor="transparent"
-                />
-              )}
-            </View>
-          )}
+            {eyeIcon && (
+              <IconButton
+                onClick={eyeIconClick}
+                size={20}
+                style={{
+                  position: "absolute",
+                  right: 12,
+                  transform: [{ translateY: "10%" }], // ✅ center it
+                }}
+                icon={eyeIconState ?? "eye"}
+                iconColor="#6B7280"
+                backgroundColor="transparent"
+              />
+            )}
+          </View>
         </View>
         {errorMes && (
           <Text
