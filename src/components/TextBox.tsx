@@ -32,6 +32,8 @@ interface TextBoxProps {
   eyeIcon?: boolean;
   eyeIconClick?: () => void;
   eyeIconState?: React.ComponentProps<typeof Ionicons>["name"];
+  multiline?: boolean;
+  numberOfLines?: number;
 }
 
 export interface TextBoxRef {
@@ -63,6 +65,8 @@ export const TextBox = forwardRef<TextBoxRef, TextBoxProps>(
       eyeIcon = false,
       eyeIconState,
       eyeIconClick,
+      multiline,
+      numberOfLines,
     },
     ref,
   ) => {
@@ -76,7 +80,7 @@ export const TextBox = forwardRef<TextBoxRef, TextBoxProps>(
       focus: () => inputRef.current?.focus(),
     }));
     return (
-      <View className="mb-4">
+      <View className="flex-1 mb-4">
         <Text style={{ fontFamily: "Inter", fontSize: 13, marginBottom: 3 }}>
           {title}{" "}
           {optionalText && (
@@ -86,7 +90,7 @@ export const TextBox = forwardRef<TextBoxRef, TextBoxProps>(
         </Text>
         <View
           style={{ backgroundColor: readonly ? "#A3A3A8" : "#F8F9FA" }}
-          className="flex-row items-center border border-gray-200 rounded-xl px-4 gap-2 h-14"
+          className="flex-row items-center border border-gray-200 rounded-xl px-4 gap-2"
         >
           {icons && <Ionicons name={icons} size={20} color="#2563EB" />}
           {readonly ? (
@@ -110,6 +114,8 @@ export const TextBox = forwardRef<TextBoxRef, TextBoxProps>(
           ) : (
             <View className="relative w-full">
               <TextInput
+                multiline={multiline}
+                numberOfLines={numberOfLines}
                 autoCorrect={autoCorrect}
                 style={style}
                 ref={inputRef}
