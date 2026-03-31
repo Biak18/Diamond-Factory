@@ -1,3 +1,6 @@
+import { IconButton } from "@/src/components/IconButton";
+import { SearchBar } from "@/src/components/SearchBar";
+import { TextBox } from "@/src/components/TextBox";
 import { DiamondSize, usePackageStore } from "@/src/stores/usePackageStore";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useRef, useState } from "react";
@@ -295,60 +298,45 @@ function AddPackageModal({
               </View>
 
               {/* Package Code */}
-              <Text className="text-sm font-medium text-dark mb-2">
-                Package Code <Text className="text-red-400">*</Text>
-              </Text>
-              <View className="flex-row items-center bg-surface border border-gray-200 rounded-xl px-4 h-14 mb-4">
-                <Ionicons name="layers-outline" size={20} color="#2563EB" />
-                <TextInput
-                  className="flex-1 ml-3 text-base text-dark"
-                  placeholder="e.g. 000-2"
-                  placeholderTextColor="#9CA3AF"
-                  value={packageCode}
-                  onChangeText={setPackageCode}
-                  autoCapitalize="characters"
-                  returnKeyType="next"
-                  onSubmitEditing={() => nameRef.current?.focus()}
-                />
-              </View>
+              <TextBox
+                value={packageCode}
+                onChange={setPackageCode}
+                autoCapitalize="characters"
+                placeholderColor="#9CA3AF"
+                placeholder="e.g. 000-2"
+                returnKeyType="next"
+                title="Package Code"
+                icons="layers-outline"
+                nullable
+                onSubmitEditing={() => nameRef.current?.focus()}
+              />
 
               {/* Package Name */}
-              <Text className="text-sm font-medium text-dark mb-2">
-                Package Name <Text className="text-red-400">*</Text>
-              </Text>
-              <View className="flex-row items-center bg-surface border border-gray-200 rounded-xl px-4 h-14 mb-4">
-                <Ionicons name="pricetag-outline" size={20} color="#2563EB" />
-                <TextInput
-                  ref={nameRef}
-                  className="flex-1 ml-3 text-base text-dark"
-                  placeholder="e.g. 000 to 2"
-                  placeholderTextColor="#9CA3AF"
-                  value={packageName}
-                  onChangeText={setPackageName}
-                  autoCapitalize="words"
-                  returnKeyType="next"
-                  onSubmitEditing={() => noteRef.current?.focus()}
-                />
-              </View>
+              <TextBox
+                value={packageCode}
+                onChange={setPackageCode}
+                autoCapitalize="words"
+                placeholderColor="#9CA3AF"
+                placeholder="e.g. 000 to 2"
+                returnKeyType="next"
+                title="Package Name"
+                icons="pricetag-outline"
+                nullable
+                onSubmitEditing={() => nameRef.current?.focus()}
+              />
 
               {/* Note */}
-              <Text className="text-sm font-medium text-dark mb-2">
-                Note{" "}
-                <Text className="text-dark/30 font-normal">(optional)</Text>
-              </Text>
-              <View className="bg-surface border border-gray-200 rounded-xl px-4 py-3 mb-8">
-                <TextInput
-                  ref={noteRef}
-                  className="text-base text-dark"
-                  placeholder="e.g. Small melee diamonds"
-                  placeholderTextColor="#9CA3AF"
-                  value={note}
-                  onChangeText={setNote}
-                  multiline
-                  numberOfLines={2}
-                  style={{ minHeight: 56 }}
-                />
-              </View>
+              <TextBox
+                multiline
+                numberOfLines={2}
+                style={{ minHeight: 70 }}
+                value={note}
+                optionalText="(optional)"
+                onChange={setNote}
+                title="Note"
+                placeholderColor="#9CA3AF"
+                placeholder="e.g. Small melee diamonds"
+              />
 
               {/* Save */}
               <TouchableOpacity
@@ -532,31 +520,19 @@ export default function PackagesScreen() {
               {packages.length !== 1 ? "s" : ""} total
             </Text>
           </View>
-          <TouchableOpacity
-            className="w-12 h-12 bg-primary rounded-xl items-center justify-center"
-            onPress={() => setModalVisible(true)}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="add" size={28} color="white" />
-          </TouchableOpacity>
+          <IconButton
+            icon="add"
+            iconColor="white"
+            onClick={() => setModalVisible(true)}
+          />
         </View>
 
         {/* Search */}
-        <View className="flex-row items-center bg-surface border border-gray-200 rounded-xl px-4 h-12 mt-4">
-          <Ionicons name="search-outline" size={18} color="#94A3B8" />
-          <TextInput
-            className="flex-1 ml-2 text-base text-dark"
-            placeholder="Search packages..."
-            placeholderTextColor="#9CA3AF"
-            value={search}
-            onChangeText={setSearch}
-          />
-          {search.length > 0 && (
-            <Pressable onPress={() => setSearch("")}>
-              <Ionicons name="close-circle" size={18} color="#94A3B8" />
-            </Pressable>
-          )}
-        </View>
+        <SearchBar
+          onChange={setSearch}
+          value={search}
+          placeholder="Search packages..."
+        />
       </View>
 
       {/* List */}

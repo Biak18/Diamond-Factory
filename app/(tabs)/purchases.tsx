@@ -1,3 +1,4 @@
+import { TextBox } from "@/src/components/TextBox";
 import { useAuthStore } from "@/src/stores/useAuthStore";
 import { usePackageStore } from "@/src/stores/usePackageStore";
 import { Purchase, usePurchaseStore } from "@/src/stores/usePurchaseStore";
@@ -377,20 +378,18 @@ function AddPurchaseModal({
               />
 
               {/* Weight CT */}
-              <Text className="text-sm font-medium text-dark mb-2">
-                Weight (CT) <Text className="text-red-400">*</Text>
-              </Text>
-              <View className="flex-row items-center bg-surface border border-gray-200 rounded-xl px-4 h-14 mb-4">
-                <Ionicons name="scale-outline" size={20} color="#2563EB" />
-                <TextInput
-                  className="flex-1 ml-3 text-base text-dark"
-                  placeholder="e.g. 100.000"
-                  placeholderTextColor="#9CA3AF"
-                  value={weightCt}
-                  onChangeText={setWeightCt}
-                  keyboardType="decimal-pad"
-                />
-              </View>
+              <TextBox
+                title="Weight"
+                icons="scale-outline"
+                value={weightCt}
+                onChange={setWeightCt}
+                keyboardType="decimal-pad"
+                placeholder="e.g. 100.000"
+                placeholderColor="#9CA3AF"
+                nullable
+                optionalText="(CT)"
+                optionalTextColor="black"
+              />
 
               {/* Currency Toggle */}
               <Text className="text-sm font-medium text-dark mb-2">
@@ -418,46 +417,25 @@ function AddPurchaseModal({
 
               {/* Price per CT + Exchange Rate */}
               <View className="flex-row gap-3 mb-4">
-                <View className="flex-1">
-                  <Text className="text-sm font-medium text-dark mb-2">
-                    Price / CT <Text className="text-red-400">*</Text>
-                  </Text>
-                  <View className="flex-row items-center bg-surface border border-gray-200 rounded-xl px-4 h-14">
-                    <Ionicons name="cash-outline" size={20} color="#2563EB" />
-                    <TextInput
-                      className="flex-1 ml-3 text-base text-dark"
-                      placeholder="0.00"
-                      placeholderTextColor="#9CA3AF"
-                      value={pricePerCt}
-                      onChangeText={setPricePerCt}
-                      keyboardType="decimal-pad"
-                    />
-                  </View>
-                </View>
-
-                <View className="flex-1">
-                  <Text className="text-sm font-medium text-dark mb-2">
-                    Exchange Rate{" "}
-                    <Text className="text-dark/30 font-normal text-xs">
-                      (opt)
-                    </Text>
-                  </Text>
-                  <View className="flex-row items-center bg-surface border border-gray-200 rounded-xl px-4 h-14">
-                    <Ionicons
-                      name="swap-horizontal-outline"
-                      size={20}
-                      color="#2563EB"
-                    />
-                    <TextInput
-                      className="flex-1 ml-3 text-base text-dark"
-                      placeholder="0.00"
-                      placeholderTextColor="#9CA3AF"
-                      value={exchangeRate}
-                      onChangeText={setExchangeRate}
-                      keyboardType="decimal-pad"
-                    />
-                  </View>
-                </View>
+                <TextBox
+                  title="Price / CT"
+                  value={pricePerCt}
+                  onChange={setPricePerCt}
+                  placeholder="0.00"
+                  placeholderColor="#9CA3AF"
+                  keyboardType="decimal-pad"
+                  icons="cash-outline"
+                  nullable
+                />
+                <TextBox
+                  title="Exchange Rate"
+                  optionalText="(opt)"
+                  value={exchangeRate}
+                  onChange={setExchangeRate}
+                  keyboardType="decimal-pad"
+                  placeholder="0.00"
+                  icons="swap-horizontal-outline"
+                />
               </View>
 
               {/* Total Price — auto calculated */}
@@ -503,22 +481,17 @@ function AddPurchaseModal({
               </View>
 
               {/* Note */}
-              <Text className="text-sm font-medium text-dark mb-2">
-                Note{" "}
-                <Text className="text-dark/30 font-normal">(optional)</Text>
-              </Text>
-              <View className="bg-surface border border-gray-200 rounded-xl px-4 py-3 mb-8">
-                <TextInput
-                  className="text-base text-dark"
-                  placeholder="e.g. Purchased from Mumbai supplier"
-                  placeholderTextColor="#9CA3AF"
-                  value={note}
-                  onChangeText={setNote}
-                  multiline
-                  numberOfLines={2}
-                  style={{ minHeight: 56 }}
-                />
-              </View>
+              <TextBox
+                value={note}
+                multiline
+                placeholder="e.g. Purchased from Mumbai supplier"
+                placeholderColor="#9CA3AF"
+                numberOfLines={2}
+                style={{ minHeight: 75 }}
+                onChange={setNote}
+                title="Note"
+                optionalText="(optional)"
+              />
 
               {/* Save */}
               <TouchableOpacity
