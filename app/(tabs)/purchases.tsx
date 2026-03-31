@@ -1,10 +1,12 @@
-import { TextBox } from "@/src/components/TextBox";
+import { RowPicker } from "@/src/components/RowPicker";
+import { TextBox, TextBoxRef } from "@/src/components/TextBox";
+import { TextButton } from "@/src/components/TextButton";
 import { useAuthStore } from "@/src/stores/useAuthStore";
 import { usePackageStore } from "@/src/stores/usePackageStore";
 import { Purchase, usePurchaseStore } from "@/src/stores/usePurchaseStore";
 import { useSupplierStore } from "@/src/stores/useSupplierStore";
 import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -196,7 +198,8 @@ function AddPurchaseModal({
   const { suppliers, fetchSuppliers } = useSupplierStore();
   const { packages, fetchPackages } = usePackageStore();
   const { user } = useAuthStore();
-
+  const pkgCodeRef = useRef<TextBoxRef>(null);
+  const pkgNameRef = useRef<TextBoxRef>(null);
   // Form state
   const [selectedSupplier, setSelectedSupplier] = useState<{
     id: string;
@@ -221,6 +224,10 @@ function AddPurchaseModal({
   // Picker visibility
   const [showSupplierPicker, setShowSupplierPicker] = useState(false);
   const [showPackagePicker, setShowPackagePicker] = useState(false);
+
+  const weightRef = useRef<TextBoxRef>(null);
+  const priceRef = useRef<TextBoxRef>(null);
+  const exchangeRef = useRef<TextBoxRef>(null);
 
   // Auto calculate total
 
@@ -272,11 +279,13 @@ function AddPurchaseModal({
       return;
     }
     if (!weightCt || isNaN(Number(weightCt)) || Number(weightCt) <= 0) {
-      Alert.alert("Invalid Weight", "Please enter a valid weight in CT.");
+      weightRef.current?.setErrorMessage("Please enter a valid weight in CT.");
+      priceRef.current?.removeErrorMessage();
       return;
     }
     if (!pricePerCt || isNaN(Number(pricePerCt)) || Number(pricePerCt) <= 0) {
-      Alert.alert("Invalid Price", "Please enter a valid price per CT.");
+      priceRef.current?.setErrorMessage("Please enter a valid price per CT.");
+      weightRef.current?.removeErrorMessage();
       return;
     }
     if (!purchaseDate) {
@@ -346,8 +355,9 @@ function AddPurchaseModal({
               showsVerticalScrollIndicator={false}
             >
               {/* Supplier */}
-              <PickerRow
-                label="Supplier"
+              <RowPicker
+                readonly={saving}
+                nullable
                 value={
                   selectedSupplier
                     ? selectedSupplier.company_name
@@ -355,30 +365,33 @@ function AddPurchaseModal({
                       : selectedSupplier.name
                     : ""
                 }
+                title="Supplier"
                 placeholder="Select a supplier"
                 icon="people-outline"
-                required
                 onPress={() => setShowSupplierPicker(true)}
                 onClear={() => setSelectedSupplier(null)}
               />
 
               {/* Package */}
-              <PickerRow
-                label="Package"
+              <RowPicker
+                readonly={saving}
+                nullable
                 value={
                   selectedPackage
                     ? `${selectedPackage.package_code} · ${selectedPackage.package_name}`
                     : ""
                 }
-                placeholder="Select a package"
+                title="Package"
                 icon="layers-outline"
-                required
+                placeholder="Select a package"
                 onPress={() => setShowPackagePicker(true)}
                 onClear={() => setSelectedPackage(null)}
               />
 
               {/* Weight CT */}
               <TextBox
+                readonly={saving}
+                ref={weightRef}
                 title="Weight"
                 icons="scale-outline"
                 value={weightCt}
@@ -418,6 +431,8 @@ function AddPurchaseModal({
               {/* Price per CT + Exchange Rate */}
               <View className="flex-row gap-3 mb-4">
                 <TextBox
+                  readonly={saving}
+                  ref={priceRef}
                   title="Price / CT"
                   value={pricePerCt}
                   onChange={setPricePerCt}
@@ -428,6 +443,8 @@ function AddPurchaseModal({
                   nullable
                 />
                 <TextBox
+                  readonly={saving}
+                  ref={exchangeRef}
                   title="Exchange Rate"
                   optionalText="(opt)"
                   value={exchangeRate}
@@ -483,6 +500,7 @@ function AddPurchaseModal({
               {/* Note */}
               <TextBox
                 value={note}
+                readonly={saving}
                 multiline
                 placeholder="e.g. Purchased from Mumbai supplier"
                 placeholderColor="#9CA3AF"
@@ -494,22 +512,12 @@ function AddPurchaseModal({
               />
 
               {/* Save */}
-              <TouchableOpacity
-                className={`h-14 rounded-xl items-center justify-center mb-2 ${
-                  saving ? "bg-primary/60" : "bg-primary"
-                }`}
-                onPress={handleSave}
+              <TextButton
+                text="Save Purchase"
+                onClick={handleSave}
                 disabled={saving}
-                activeOpacity={0.8}
-              >
-                {saving ? (
-                  <ActivityIndicator color="white" />
-                ) : (
-                  <Text className="text-white text-base font-bold">
-                    Save Purchase
-                  </Text>
-                )}
-              </TouchableOpacity>
+                loading={saving}
+              />
             </KeyboardAwareScrollView>
           </View>
         </View>

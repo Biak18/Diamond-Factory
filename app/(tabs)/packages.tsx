@@ -1,6 +1,8 @@
 import { IconButton } from "@/src/components/IconButton";
+import { RowPicker, RowPickerRef } from "@/src/components/RowPicker";
 import { SearchBar } from "@/src/components/SearchBar";
-import { TextBox } from "@/src/components/TextBox";
+import { TextBox, TextBoxRef } from "@/src/components/TextBox";
+import { TextButton } from "@/src/components/TextButton";
 import { DiamondSize, usePackageStore } from "@/src/stores/usePackageStore";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useRef, useState } from "react";
@@ -127,46 +129,6 @@ function SievePickerModal({
   );
 }
 
-// ─── Sieve Picker Row ─────────────────────────────────────────────
-function SievePickerRow({
-  label,
-  selected,
-  onPress,
-  onClear,
-}: {
-  label: string;
-  selected: DiamondSize | null;
-  onPress: () => void;
-  onClear: () => void;
-}) {
-  return (
-    <View className="flex-1">
-      <TouchableOpacity
-        className="flex-row items-center bg-surface border border-gray-200 rounded-xl px-4 h-14"
-        onPress={onPress}
-        activeOpacity={0.7}
-      >
-        <Ionicons name="diamond-outline" size={18} color="#2563EB" />
-        <Text
-          className={`flex-1 ml-2 text-sm ${
-            selected ? "text-dark font-medium" : "text-gray-400"
-          }`}
-          numberOfLines={1}
-        >
-          {selected ? selected.sieve_size : label}
-        </Text>
-        {selected ? (
-          <Pressable onPress={onClear} hitSlop={8}>
-            <Ionicons name="close-circle" size={18} color="#94A3B8" />
-          </Pressable>
-        ) : (
-          <Ionicons name="chevron-down-outline" size={16} color="#94A3B8" />
-        )}
-      </TouchableOpacity>
-    </View>
-  );
-}
-
 // ─── Add Package Modal ────────────────────────────────────────────
 function AddPackageModal({
   visible,
@@ -187,8 +149,11 @@ function AddPackageModal({
   const [showFromPicker, setShowFromPicker] = useState(false);
   const [showToPicker, setShowToPicker] = useState(false);
 
-  const nameRef = useRef<TextInput>(null);
-  const noteRef = useRef<TextInput>(null);
+  const pkgNameRef = useRef<TextBoxRef>(null);
+  const pkgCodeRef = useRef<TextBoxRef>(null);
+  const noteRef = useRef<TextBoxRef>(null);
+  const fromRef = useRef<RowPickerRef>(null);
+  const toRef = useRef<RowPickerRef>(null);
 
   useEffect(() => {
     if (visible) fetchSizes();
@@ -196,11 +161,13 @@ function AddPackageModal({
 
   const handleSave = async () => {
     if (!packageCode.trim()) {
-      Alert.alert("Missing Info", "Please enter a package code.");
+      pkgCodeRef.current?.setErrorMessage("Please enter a package code.");
+      pkgNameRef.current?.removeErrorMessage();
       return;
     }
     if (!packageName.trim()) {
-      Alert.alert("Missing Info", "Please enter a package name.");
+      pkgNameRef.current?.setErrorMessage("Please enter a package name.");
+      pkgCodeRef.current?.removeErrorMessage();
       return;
     }
 
@@ -272,33 +239,31 @@ function AddPackageModal({
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={false}
             >
-              {/* Sieve Range — optional */}
-              <Text className="text-sm font-medium text-dark mb-2">
-                Sieve Range{" "}
-                <Text className="text-dark/30 font-normal">(optional)</Text>
-              </Text>
               <View className="flex-row items-center gap-2 mb-4">
-                <SievePickerRow
-                  label="From"
-                  selected={sieveFrom}
+                <RowPicker
+                  ref={fromRef}
+                  value={sieveFrom?.sieve_size}
+                  placeholder="From"
                   onPress={() => setShowFromPicker(true)}
                   onClear={() => setSieveFrom(null)}
+                  title="Sieve Range"
+                  optionalText="(optional)"
+                  icon="diamond-outline"
+                  toArrow
                 />
-                <Ionicons
-                  name="arrow-forward-outline"
-                  size={16}
-                  color="#94A3B8"
-                />
-                <SievePickerRow
-                  label="To"
-                  selected={sieveTo}
+                <RowPicker
+                  ref={toRef}
+                  value={sieveTo?.sieve_size}
+                  placeholder="To"
                   onPress={() => setShowToPicker(true)}
                   onClear={() => setSieveTo(null)}
+                  icon="diamond-outline"
                 />
               </View>
 
               {/* Package Code */}
               <TextBox
+                ref={pkgCodeRef}
                 value={packageCode}
                 onChange={setPackageCode}
                 autoCapitalize="characters"
@@ -308,13 +273,14 @@ function AddPackageModal({
                 title="Package Code"
                 icons="layers-outline"
                 nullable
-                onSubmitEditing={() => nameRef.current?.focus()}
+                onSubmitEditing={() => pkgNameRef.current?.focus()}
               />
 
               {/* Package Name */}
               <TextBox
-                value={packageCode}
-                onChange={setPackageCode}
+                ref={pkgNameRef}
+                value={packageName}
+                onChange={setPackageName}
                 autoCapitalize="words"
                 placeholderColor="#9CA3AF"
                 placeholder="e.g. 000 to 2"
@@ -322,11 +288,12 @@ function AddPackageModal({
                 title="Package Name"
                 icons="pricetag-outline"
                 nullable
-                onSubmitEditing={() => nameRef.current?.focus()}
+                onSubmitEditing={() => noteRef.current?.focus()}
               />
 
               {/* Note */}
               <TextBox
+                ref={noteRef}
                 multiline
                 numberOfLines={2}
                 style={{ minHeight: 70 }}
@@ -339,22 +306,12 @@ function AddPackageModal({
               />
 
               {/* Save */}
-              <TouchableOpacity
-                className={`h-14 rounded-xl items-center justify-center ${
-                  saving ? "bg-primary/60" : "bg-primary"
-                }`}
-                onPress={handleSave}
+              <TextButton
+                text="Save Package"
+                loading={saving}
                 disabled={saving}
-                activeOpacity={0.8}
-              >
-                {saving ? (
-                  <ActivityIndicator color="white" />
-                ) : (
-                  <Text className="text-white text-base font-bold">
-                    Save Package
-                  </Text>
-                )}
-              </TouchableOpacity>
+                onClick={handleSave}
+              />
             </KeyboardAwareScrollView>
           </View>
         </View>
