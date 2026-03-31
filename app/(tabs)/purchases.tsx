@@ -1,4 +1,4 @@
-import { DatePicker } from "@/src/components/DatePicker";
+import { DatePicker, DatePickerRef } from "@/src/components/DatePicker";
 import { RowPicker, RowPickerRef } from "@/src/components/RowPicker";
 import { TextBox, TextBoxRef } from "@/src/components/TextBox";
 import { TextButton } from "@/src/components/TextButton";
@@ -136,58 +136,6 @@ function PickerModal<T extends { id: string }>({
   );
 }
 
-// ─── Picker Row ───────────────────────────────────────────────────
-function PickerRow({
-  label,
-  value,
-  placeholder,
-  icon,
-  required,
-  onPress,
-  onClear,
-}: {
-  label: string;
-  value: string;
-  placeholder: string;
-  icon: string;
-  required?: boolean;
-  onPress: () => void;
-  onClear: () => void;
-}) {
-  return (
-    <View className="mb-4">
-      <Text className="text-sm font-medium text-dark mb-2">
-        {label}{" "}
-        {required ? (
-          <Text className="text-red-400">*</Text>
-        ) : (
-          <Text className="text-dark/30 font-normal">(optional)</Text>
-        )}
-      </Text>
-      <TouchableOpacity
-        className="flex-row items-center bg-surface border border-gray-200 rounded-xl px-4 h-14"
-        onPress={onPress}
-        activeOpacity={0.7}
-      >
-        <Ionicons name={icon as any} size={20} color="#2563EB" />
-        <Text
-          className={`flex-1 ml-3 text-base ${value ? "text-dark" : "text-gray-400"}`}
-          numberOfLines={1}
-        >
-          {value || placeholder}
-        </Text>
-        {value ? (
-          <Pressable onPress={onClear} hitSlop={8}>
-            <Ionicons name="close-circle" size={18} color="#94A3B8" />
-          </Pressable>
-        ) : (
-          <Ionicons name="chevron-down-outline" size={18} color="#94A3B8" />
-        )}
-      </TouchableOpacity>
-    </View>
-  );
-}
-
 // ─── Add Purchase Modal ───────────────────────────────────────────
 function AddPurchaseModal({
   visible,
@@ -235,6 +183,8 @@ function AddPurchaseModal({
   const supplierRef = useRef<RowPickerRef>(null);
   const packageRef = useRef<RowPickerRef>(null);
 
+  const purchaseDateRef = useRef<DatePickerRef>(null);
+
   // Auto calculate total
 
   const totalPrice = useMemo(() => {
@@ -280,42 +230,33 @@ function AddPurchaseModal({
   const handleSave = async () => {
     if (!selectedSupplier) {
       supplierRef.current?.setErrorMessage("Please select a suppiler");
-      packageRef.current?.removeErrorMessage();
+      expectMessageRemover("supplier");
       return;
     }
     if (!selectedPackage) {
       packageRef.current?.setErrorMessage("Please select a package.");
-      supplierRef.current?.removeErrorMessage();
+      expectMessageRemover("pack");
       return;
     }
     if (!weightCt || isNaN(Number(weightCt)) || Number(weightCt) <= 0) {
       weightRef.current?.setErrorMessage("Please enter a valid weight in CT.");
-      priceRef.current?.removeErrorMessage();
-      packageRef.current?.removeErrorMessage();
-      supplierRef.current?.removeErrorMessage();
+      expectMessageRemover("weight");
       return;
     }
     if (!pricePerCt || isNaN(Number(pricePerCt)) || Number(pricePerCt) <= 0) {
       priceRef.current?.setErrorMessage("Please enter a valid price per CT.");
-      weightRef.current?.removeErrorMessage();
-      packageRef.current?.removeErrorMessage();
-      supplierRef.current?.removeErrorMessage();
+      expectMessageRemover("price");
       return;
     }
     if (!purchaseDate) {
-      Alert.alert("Missing Info", "Please enter a purchase date.");
-      weightRef.current?.removeErrorMessage();
-      priceRef.current?.removeErrorMessage();
-      packageRef.current?.removeErrorMessage();
-      supplierRef.current?.removeErrorMessage();
+      purchaseDateRef.current?.setErrorMessage("Please enter a purchase date.");
+      expectMessageRemover("purdate");
       return;
     }
     if (!user?.id) {
       Alert.alert("Error", "User session not found.");
-      weightRef.current?.removeErrorMessage();
-      priceRef.current?.removeErrorMessage();
-      packageRef.current?.removeErrorMessage();
-      supplierRef.current?.removeErrorMessage();
+      expectMessageRemover("all");
+
       return;
     }
 
@@ -338,6 +279,56 @@ function AddPurchaseModal({
       Alert.alert("Error", err?.message || "Could not save purchase.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const expectMessageRemover = (
+    type: "purdate" | "supplier" | "pack" | "weight" | "price" | "all",
+  ) => {
+    switch (type) {
+      case "all": {
+        weightRef.current?.removeErrorMessage();
+        priceRef.current?.removeErrorMessage();
+        packageRef.current?.removeErrorMessage();
+        supplierRef.current?.removeErrorMessage();
+        purchaseDateRef.current?.removeErrorMessage();
+        break;
+      }
+      case "pack": {
+        weightRef.current?.removeErrorMessage();
+        priceRef.current?.removeErrorMessage();
+        supplierRef.current?.removeErrorMessage();
+        purchaseDateRef.current?.removeErrorMessage();
+        break;
+      }
+      case "price": {
+        weightRef.current?.removeErrorMessage();
+        packageRef.current?.removeErrorMessage();
+        supplierRef.current?.removeErrorMessage();
+        purchaseDateRef.current?.removeErrorMessage();
+        break;
+      }
+      case "purdate": {
+        weightRef.current?.removeErrorMessage();
+        priceRef.current?.removeErrorMessage();
+        packageRef.current?.removeErrorMessage();
+        supplierRef.current?.removeErrorMessage();
+        break;
+      }
+      case "supplier": {
+        weightRef.current?.removeErrorMessage();
+        priceRef.current?.removeErrorMessage();
+        packageRef.current?.removeErrorMessage();
+        purchaseDateRef.current?.removeErrorMessage();
+        break;
+      }
+      case "weight": {
+        priceRef.current?.removeErrorMessage();
+        packageRef.current?.removeErrorMessage();
+        supplierRef.current?.removeErrorMessage();
+        purchaseDateRef.current?.removeErrorMessage();
+        break;
+      }
     }
   };
 
@@ -507,10 +498,12 @@ function AddPurchaseModal({
 
               {/* Purchase Date */}
               <DatePicker
+                readonly={saving}
+                ref={purchaseDateRef}
                 title="Purchase Date"
                 nullabe
                 value={purchaseDate}
-                OnDateChange={(date: Date) => {
+                OnDateChange={(date: any) => {
                   setPurchaseDate(date);
                 }}
                 placeholder="DD-MM-YY"

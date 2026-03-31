@@ -7,18 +7,19 @@ interface DatePickerProps {
   title?: string;
   nullabe?: boolean;
   value: Date;
-  OnDateChange: (date: Date) => void;
+  OnDateChange: (date: Date | null) => void;
   placeholder?: string;
   getInitialDate?: (date: Date) => void;
+  readonly?: boolean;
 }
 
-export interface DataPickerRef {
+export interface DatePickerRef {
   setErrorMessage: (message: string) => void;
   removeErrorMessage: () => void;
 }
 
-export const DatePicker = forwardRef<DataPickerRef, DatePickerProps>(
-  ({ value, nullabe, title, OnDateChange, placeholder }, ref) => {
+export const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(
+  ({ value, nullabe, title, OnDateChange, placeholder, readonly }, ref) => {
     const [error, setError] = useState("");
     const [show, setShow] = useState(false);
     useImperativeHandle(ref, () => ({
@@ -33,8 +34,10 @@ export const DatePicker = forwardRef<DataPickerRef, DatePickerProps>(
           {title} {nullabe && <Text className="text-red-400">*</Text>}
         </Text>
         <Pressable
+          disabled={readonly}
           onPress={() => setShow(true)}
-          className="flex-row items-center bg-surface border border-gray-200 rounded-xl px-4 h-14 mb-4"
+          style={{ backgroundColor: readonly ? "#A3A3A8" : "#F8F9FA" }}
+          className="flex-row items-center border border-gray-200 rounded-xl px-4 h-14 mb-2 relative"
         >
           <Ionicons name="calendar-outline" size={20} color="#2563EB" />
           <Text
@@ -42,14 +45,19 @@ export const DatePicker = forwardRef<DataPickerRef, DatePickerProps>(
             className="flex-1 ml-3 text-base"
           >
             {value
-              ? `${value.getDate()}-${value.getMonth() + 1}-${String(value.getFullYear())}`
+              ? `${value.getDate()}-${value.getMonth() + 1}-${value.getFullYear()}`
               : placeholder}
           </Text>
+          {value && (
+            <Pressable onPress={() => OnDateChange(null)}>
+              <Ionicons name="close-circle" size={18} color="#94A3B8" />
+            </Pressable>
+          )}
         </Pressable>
         <DateTimePickerModal
           isVisible={show}
           mode="date"
-          date={value}
+          date={value || new Date()}
           onConfirm={(date) => {
             setShow(false);
             OnDateChange(date);
