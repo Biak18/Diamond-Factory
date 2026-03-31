@@ -1,3 +1,4 @@
+import { DatePicker } from "@/src/components/DatePicker";
 import { RowPicker, RowPickerRef } from "@/src/components/RowPicker";
 import { TextBox, TextBoxRef } from "@/src/components/TextBox";
 import { TextButton } from "@/src/components/TextButton";
@@ -216,9 +217,10 @@ function AddPurchaseModal({
   const [currency, setCurrency] = useState<"INR" | "USD">("USD");
   const [pricePerCt, setPricePerCt] = useState("");
   const [exchangeRate, setExchangeRate] = useState("");
-  const [purchaseDate, setPurchaseDate] = useState(
-    new Date().toISOString().split("T")[0],
-  );
+  const [purchaseDate, setPurchaseDate] = useState<Date>(new Date());
+  // const [purchaseDate, setPurchaseDate] = useState(
+  //   new Date().toISOString().split("T")[0],
+  // );
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -265,7 +267,8 @@ function AddPurchaseModal({
     setCurrency("USD");
     setPricePerCt("");
     setExchangeRate("");
-    setPurchaseDate(new Date().toISOString().split("T")[0]);
+    // setPurchaseDate(new Date().toISOString().split("T")[0]);
+    setPurchaseDate(new Date());
     setNote("");
   };
 
@@ -326,7 +329,7 @@ function AddPurchaseModal({
         price_per_ct: Number(pricePerCt),
         total_price: totalPrice,
         exchange_rate: exchangeRate ? Number(exchangeRate) : undefined,
-        purchase_date: purchaseDate,
+        purchase_date: purchaseDate.toISOString().split("T")[0],
         note: note.trim() || undefined,
         created_by: user.id,
       });
@@ -503,20 +506,15 @@ function AddPurchaseModal({
               </View>
 
               {/* Purchase Date */}
-              <Text className="text-sm font-medium text-dark mb-2">
-                Purchase Date <Text className="text-red-400">*</Text>
-              </Text>
-              <View className="flex-row items-center bg-surface border border-gray-200 rounded-xl px-4 h-14 mb-4">
-                <Ionicons name="calendar-outline" size={20} color="#2563EB" />
-                <TextInput
-                  className="flex-1 ml-3 text-base text-dark"
-                  placeholder="YYYY-MM-DD"
-                  placeholderTextColor="#9CA3AF"
-                  value={purchaseDate}
-                  onChangeText={setPurchaseDate}
-                  keyboardType="numeric"
-                />
-              </View>
+              <DatePicker
+                title="Purchase Date"
+                nullabe
+                value={purchaseDate}
+                OnDateChange={(date: Date) => {
+                  setPurchaseDate(date);
+                }}
+                placeholder="DD-MM-YY"
+              />
 
               {/* Note */}
               <TextBox
