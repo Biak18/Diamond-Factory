@@ -91,23 +91,21 @@ export default function SignInScreen() {
               autoCorrect={false}
             />
             {/*Password Input*/}
-            <View className="relative w-full">
-              <TextBox
-                ref={passInput}
-                title="Password"
-                icons="lock-closed-outline"
-                value={password}
-                readonly={loading}
-                onChange={setPassword}
-                placeholder="••••••••"
-                placeholderColor="#9CA3AF"
-                secureTextEntry={!showPassword}
-                autoCapitalize="none"
-                eyeIcon
-                eyeIconClick={() => setShowPassword(!showPassword)}
-                eyeIconState={showPassword ? "eye-outline" : "eye-off-outline"}
-              />
-            </View>
+            <TextBox
+              ref={passInput}
+              title="Password"
+              icons="lock-closed-outline"
+              value={password}
+              readonly={loading}
+              onChange={setPassword}
+              placeholder="••••••••"
+              placeholderColor="#9CA3AF"
+              secureTextEntry={!showPassword}
+              autoCapitalize="none"
+              eyeIcon
+              eyeIconClick={() => setShowPassword(!showPassword)}
+              eyeIconState={showPassword ? "eye-outline" : "eye-off-outline"}
+            />
             <TextButton
               text="Sign In"
               loading={loading}
