@@ -1,3 +1,4 @@
+import BottomSheet from "@/src/components/BottomSheet";
 import { DatePicker, DatePickerRef } from "@/src/components/DatePicker";
 import { RowPicker, RowPickerRef } from "@/src/components/RowPicker";
 import { TextBox, TextBoxRef } from "@/src/components/TextBox";
@@ -9,11 +10,13 @@ import { usePackageStore } from "@/src/stores/usePackageStore";
 import { Purchase, usePurchaseStore } from "@/src/stores/usePurchaseStore";
 import { useSupplierStore } from "@/src/stores/useSupplierStore";
 import { Ionicons } from "@expo/vector-icons";
+import { Portal } from "@gorhom/portal";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  BackHandler,
+  Dimensions,
   FlatList,
-  Modal,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -22,7 +25,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+
+const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 // ─── Helpers ──────────────────────────────────────────────────────
 const formatDate = (iso: string) => {
@@ -61,78 +65,174 @@ function PickerModal<T extends { id: string }>({
   onClose: () => void;
 }) {
   const [search, setSearch] = useState("");
+  useEffect(() => {
+    if (!visible) return;
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => {
+      setSearch("");
+      onClose();
+      return true;
+    });
+    return () => sub.remove();
+  }, [visible]);
+  if (!visible) return null;
 
   const filtered = data.filter((d) =>
     String(d[labelKey]).toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
-    >
-      <Pressable className="flex-1 bg-black/40" onPress={onClose} />
+    <Portal hostName="bottomsheet">
       <View
-        className="bg-white rounded-t-3xl px-6 pt-4"
-        style={{ maxHeight: "60%" }}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          justifyContent: "flex-end",
+        }}
       >
-        <View className="w-12 h-1 bg-gray-200 rounded-full self-center mb-4" />
-        <Text className="text-lg font-bold text-dark mb-4">{title}</Text>
+        {/* Backdrop */}
+        <Pressable
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.6)",
+          }}
+          onPress={() => {
+            setSearch("");
+            onClose();
+          }}
+        />
 
-        <View className="flex-row items-center bg-surface border border-gray-200 rounded-xl px-4 h-12 mb-3">
-          <Ionicons name="search-outline" size={18} color="#94A3B8" />
-          <TextInput
-            className="flex-1 ml-2 text-base text-dark"
-            placeholder="Search..."
-            placeholderTextColor="#9CA3AF"
-            value={search}
-            onChangeText={setSearch}
+        {/* Sheet */}
+        <View
+          style={{
+            backgroundColor: "white",
+            borderTopLeftRadius: 24,
+            borderTopRightRadius: 24,
+            paddingHorizontal: 24,
+            paddingTop: 16,
+            paddingBottom: 40,
+            maxHeight: SCREEN_HEIGHT * 0.6,
+          }}
+        >
+          {/* Handle bar */}
+          <View
+            style={{
+              width: 48,
+              height: 4,
+              backgroundColor: "#E2E8F0",
+              borderRadius: 2,
+              alignSelf: "center",
+              marginBottom: 16,
+            }}
           />
-        </View>
 
-        <ScrollView showsVerticalScrollIndicator={false} className="mb-6">
-          {filtered.map((item) => {
-            const isSelected = selected?.id === item.id;
-            return (
-              <TouchableOpacity
-                key={item.id}
-                className={`flex-row items-center py-3 px-2 rounded-xl mb-1 ${
-                  isSelected ? "bg-primary/10" : ""
-                }`}
-                onPress={() => {
-                  onSelect(item);
-                  setSearch("");
-                  onClose();
-                }}
-              >
-                <View className="flex-1">
-                  <Text
-                    className={`text-base font-medium ${isSelected ? "text-primary" : "text-dark"}`}
-                  >
-                    {String(item[labelKey])}
-                  </Text>
-                  {subKey && item[subKey] && (
-                    <Text className="text-sm text-dark/40 mt-0.5">
-                      {String(item[subKey])}
+          {/* Title */}
+          <Text
+            style={{
+              fontSize: 18,
+              fontFamily: "Inter_700Bold",
+              color: "#0F172A",
+              marginBottom: 16,
+            }}
+          >
+            {title}
+          </Text>
+
+          {/* Search */}
+          <View className="flex-row items-center bg-surface border border-gray-200 rounded-xl px-4 h-12 mb-3">
+            <Ionicons name="search-outline" size={18} color="#94A3B8" />
+            <TextInput
+              className="flex-1 ml-2 text-base text-dark"
+              placeholder="Search..."
+              placeholderTextColor="#9CA3AF"
+              value={search}
+              onChangeText={setSearch}
+            />
+            {search.length > 0 && (
+              <Pressable onPress={() => setSearch("")}>
+                <Ionicons name="close-circle" size={18} color="#94A3B8" />
+              </Pressable>
+            )}
+          </View>
+
+          {/* List */}
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            style={{ marginBottom: 8 }}
+          >
+            {filtered.map((item) => {
+              const isSelected = selected?.id === item.id;
+              return (
+                <TouchableOpacity
+                  key={item.id}
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    paddingVertical: 12,
+                    paddingHorizontal: 8,
+                    borderRadius: 12,
+                    marginBottom: 4,
+                    backgroundColor: isSelected
+                      ? "rgba(37,99,235,0.1)"
+                      : "transparent",
+                  }}
+                  onPress={() => {
+                    onSelect(item);
+                    setSearch("");
+                    onClose();
+                  }}
+                >
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        fontFamily: "Inter_500Medium",
+                        color: isSelected ? "#2563EB" : "#0F172A",
+                      }}
+                    >
+                      {String(item[labelKey])}
                     </Text>
+                    {subKey && item[subKey] && (
+                      <Text
+                        style={{
+                          fontSize: 13,
+                          color: "#94A3B8",
+                          marginTop: 2,
+                        }}
+                      >
+                        {String(item[subKey])}
+                      </Text>
+                    )}
+                  </View>
+
+                  {isSelected && (
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={20}
+                      color="#2563EB"
+                    />
                   )}
-                </View>
-                {isSelected && (
-                  <Ionicons name="checkmark-circle" size={20} color="#2563EB" />
-                )}
-              </TouchableOpacity>
-            );
-          })}
-          {filtered.length === 0 && (
-            <View className="items-center py-10">
-              <Text className="text-base text-dark/40">No results found</Text>
-            </View>
-          )}
-        </ScrollView>
+                </TouchableOpacity>
+              );
+            })}
+
+            {filtered.length === 0 && (
+              <View style={{ alignItems: "center", paddingVertical: 40 }}>
+                <Text style={{ fontSize: 16, color: "#94A3B8" }}>
+                  No results found
+                </Text>
+              </View>
+            )}
+          </ScrollView>
+        </View>
       </View>
-    </Modal>
+    </Portal>
   );
 }
 
@@ -333,206 +433,170 @@ function AddPurchaseModal({
 
   return (
     <>
-      <Modal
-        visible={visible}
-        transparent
-        animationType="slide"
-        onRequestClose={handleClose}
-      >
-        <View className="flex-1 justify-end">
-          <Pressable className="flex-1" onPress={handleClose} />
+      <BottomSheet visible={visible} title="New Purchase" onClose={handleClose}>
+        <RowPicker
+          ref={supplierRef}
+          readonly={saving}
+          nullable
+          value={
+            selectedSupplier
+              ? selectedSupplier.company_name
+                ? `${selectedSupplier.name} · ${selectedSupplier.company_name}`
+                : selectedSupplier.name
+              : ""
+          }
+          title="Supplier"
+          placeholder="Select a supplier"
+          icon="people-outline"
+          onPress={() => setShowSupplierPicker(true)}
+          onClear={() => setSelectedSupplier(null)}
+        />
 
-          <View
-            className="bg-white rounded-t-3xl px-6 pt-4 pb-10"
-            style={{ maxHeight: "95%" }}
-          >
-            <View className="w-12 h-1 bg-gray-200 rounded-full self-center mb-5" />
+        {/* Package */}
+        <RowPicker
+          ref={packageRef}
+          readonly={saving}
+          nullable
+          value={
+            selectedPackage
+              ? `${selectedPackage.package_code} · ${selectedPackage.package_name}`
+              : ""
+          }
+          title="Package"
+          icon="layers-outline"
+          placeholder="Select a package"
+          onPress={() => setShowPackagePicker(true)}
+          onClear={() => setSelectedPackage(null)}
+        />
 
-            <View className="flex-row items-center justify-between mb-6">
-              <Text className="text-xl font-bold text-dark">New Purchase</Text>
-              <TouchableOpacity onPress={handleClose}>
-                <Ionicons
-                  name="close-circle-outline"
-                  size={28}
-                  color="#94A3B8"
-                />
-              </TouchableOpacity>
-            </View>
+        {/* Weight CT */}
+        <TextBox
+          readonly={saving}
+          ref={weightRef}
+          title="Weight"
+          icons="scale-outline"
+          value={weightCt}
+          onChange={setWeightCt}
+          keyboardType="decimal-pad"
+          placeholder="e.g. 100.000"
+          placeholderColor="#9CA3AF"
+          nullable
+          optionalText="(CT)"
+          optionalTextColor="black"
+        />
 
-            <KeyboardAwareScrollView
-              enableOnAndroid={true}
-              enableAutomaticScroll={true}
-              extraScrollHeight={80}
-              keyboardShouldPersistTaps="handled"
-              showsVerticalScrollIndicator={false}
+        {/* Currency Toggle */}
+        <Text className="text-sm font-medium text-dark mb-2">
+          Currency <Text className="text-red-400">*</Text>
+        </Text>
+        <View className="flex-row bg-surface rounded-xl p-1 mb-4">
+          {(["USD", "INR"] as const).map((c) => (
+            <TouchableOpacity
+              key={c}
+              className={`flex-1 h-12 rounded-xl items-center justify-center flex-row gap-2 ${
+                currency === c ? "bg-primary" : ""
+              }`}
+              onPress={() => setCurrency(c)}
             >
-              {/* Supplier */}
-              <RowPicker
-                ref={supplierRef}
-                readonly={saving}
-                nullable
-                value={
-                  selectedSupplier
-                    ? selectedSupplier.company_name
-                      ? `${selectedSupplier.name} · ${selectedSupplier.company_name}`
-                      : selectedSupplier.name
-                    : ""
-                }
-                title="Supplier"
-                placeholder="Select a supplier"
-                icon="people-outline"
-                onPress={() => setShowSupplierPicker(true)}
-                onClear={() => setSelectedSupplier(null)}
-              />
-
-              {/* Package */}
-              <RowPicker
-                ref={packageRef}
-                readonly={saving}
-                nullable
-                value={
-                  selectedPackage
-                    ? `${selectedPackage.package_code} · ${selectedPackage.package_name}`
-                    : ""
-                }
-                title="Package"
-                icon="layers-outline"
-                placeholder="Select a package"
-                onPress={() => setShowPackagePicker(true)}
-                onClear={() => setSelectedPackage(null)}
-              />
-
-              {/* Weight CT */}
-              <TextBox
-                readonly={saving}
-                ref={weightRef}
-                title="Weight"
-                icons="scale-outline"
-                value={weightCt}
-                onChange={setWeightCt}
-                keyboardType="decimal-pad"
-                placeholder="e.g. 100.000"
-                placeholderColor="#9CA3AF"
-                nullable
-                optionalText="(CT)"
-                optionalTextColor="black"
-              />
-
-              {/* Currency Toggle */}
-              <Text className="text-sm font-medium text-dark mb-2">
-                Currency <Text className="text-red-400">*</Text>
+              <Text
+                className={`text-base font-bold ${
+                  currency === c ? "text-white" : "text-dark/40"
+                }`}
+              >
+                {c === "USD" ? "🇺🇸 USD" : "🇮🇳 INR"}
               </Text>
-              <View className="flex-row bg-surface rounded-xl p-1 mb-4">
-                {(["USD", "INR"] as const).map((c) => (
-                  <TouchableOpacity
-                    key={c}
-                    className={`flex-1 h-12 rounded-xl items-center justify-center flex-row gap-2 ${
-                      currency === c ? "bg-primary" : ""
-                    }`}
-                    onPress={() => setCurrency(c)}
-                  >
-                    <Text
-                      className={`text-base font-bold ${
-                        currency === c ? "text-white" : "text-dark/40"
-                      }`}
-                    >
-                      {c === "USD" ? "🇺🇸 USD" : "🇮🇳 INR"}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
+            </TouchableOpacity>
+          ))}
+        </View>
 
-              {/* Price per CT + Exchange Rate */}
-              <View className="flex-row gap-3 mb-4">
-                <TextBox
-                  readonly={saving}
-                  ref={priceRef}
-                  title="Price / CT"
-                  value={pricePerCt}
-                  onChange={setPricePerCt}
-                  placeholder="0.00"
-                  placeholderColor="#9CA3AF"
-                  keyboardType="decimal-pad"
-                  icons="cash-outline"
-                  nullable
-                />
-                <TextBox
-                  readonly={saving}
-                  ref={exchangeRef}
-                  title="Exchange Rate"
-                  optionalText="(opt)"
-                  value={exchangeRate}
-                  onChange={setExchangeRate}
-                  keyboardType="decimal-pad"
-                  placeholder="0.00"
-                  icons="swap-horizontal-outline"
-                />
-              </View>
+        {/* Price per CT + Exchange Rate */}
+        <View className="flex-row gap-3 mb-4">
+          <TextBox
+            readonly={saving}
+            ref={priceRef}
+            title="Price / CT"
+            value={pricePerCt}
+            onChange={setPricePerCt}
+            placeholder="0.00"
+            placeholderColor="#9CA3AF"
+            keyboardType="decimal-pad"
+            icons="cash-outline"
+            nullable
+          />
+          <TextBox
+            readonly={saving}
+            ref={exchangeRef}
+            title="Exchange Rate"
+            optionalText="(opt)"
+            value={exchangeRate}
+            onChange={setExchangeRate}
+            keyboardType="decimal-pad"
+            placeholder="0.00"
+            icons="swap-horizontal-outline"
+          />
+        </View>
 
-              {/* Total Price — auto calculated */}
-              <View className="bg-primary/10 border border-primary/20 rounded-xl px-4 py-3 mb-4">
-                <Text className="text-xs text-primary/70 mb-1">
-                  Total Price (auto calculated)
-                </Text>
-                <Text className="text-2xl font-bold text-primary">
-                  {Number(exchangeRate) > 0
-                    ? "K " // MMK symbol
-                    : currency === "USD"
-                      ? "$ "
-                      : "₹ "}
-                  {formatNumber(totalPrice)}
-                </Text>
-                {weightCt && pricePerCt && (
-                  <Text className="text-xs text-primary/50 mt-1">
-                    {/* {Number(exchangeRate) > 0
+        {/* Total Price — auto calculated */}
+        <View className="bg-primary/10 border border-primary/20 rounded-xl px-4 py-3 mb-4">
+          <Text className="text-xs text-primary/70 mb-1">
+            Total Price (auto calculated)
+          </Text>
+          <Text className="text-2xl font-bold text-primary">
+            {Number(exchangeRate) > 0
+              ? "K " // MMK symbol
+              : currency === "USD"
+                ? "$ "
+                : "₹ "}
+            {formatNumber(totalPrice)}
+          </Text>
+          {weightCt && pricePerCt && (
+            <Text className="text-xs text-primary/50 mt-1">
+              {/* {Number(exchangeRate) > 0
                       ? `${weightCt} CT × ${currency === "USD" ? "$" : "₹"}${pricePerCt} × ${exchangeRate} (MMK rate)`
                       : `${weightCt} CT × ${currency === "USD" ? "$" : "₹"}${pricePerCt} / CT`} */}
 
-                    {Number(exchangeRate) > 0
-                      ? `${currency === "USD" ? "$" : "₹"}${pricePerCt} × ${exchangeRate} (MMK rate)`
-                      : `${currency === "USD" ? "$" : "₹"}${pricePerCt} / CT`}
-                  </Text>
-                )}
-              </View>
-
-              {/* Purchase Date */}
-              <DatePicker
-                readonly={saving}
-                ref={purchaseDateRef}
-                title="Purchase Date"
-                nullable
-                value={purchaseDate}
-                OnDateChange={(date: any) => {
-                  setPurchaseDate(date);
-                }}
-                placeholder="DD-MM-YY"
-              />
-
-              {/* Note */}
-              <TextBox
-                value={note}
-                readonly={saving}
-                multiline
-                placeholder="e.g. Purchased from Mumbai supplier"
-                placeholderColor="#9CA3AF"
-                numberOfLines={2}
-                style={{ minHeight: 75 }}
-                onChange={setNote}
-                title="Note"
-                optionalText="(optional)"
-              />
-
-              {/* Save */}
-              <TextButton
-                text="Save Purchase"
-                onClick={handleSave}
-                disabled={saving}
-                loading={saving}
-              />
-            </KeyboardAwareScrollView>
-          </View>
+              {Number(exchangeRate) > 0
+                ? `${currency === "USD" ? "$" : "₹"}${pricePerCt} × ${exchangeRate} (MMK rate)`
+                : `${currency === "USD" ? "$" : "₹"}${pricePerCt} / CT`}
+            </Text>
+          )}
         </View>
-      </Modal>
+
+        {/* Purchase Date */}
+        <DatePicker
+          readonly={saving}
+          ref={purchaseDateRef}
+          title="Purchase Date"
+          nullable
+          value={purchaseDate}
+          OnDateChange={(date: any) => {
+            setPurchaseDate(date);
+          }}
+          placeholder="DD-MM-YY"
+        />
+
+        {/* Note */}
+        <TextBox
+          value={note}
+          readonly={saving}
+          multiline
+          placeholder="e.g. Purchased from Mumbai supplier"
+          placeholderColor="#9CA3AF"
+          numberOfLines={2}
+          style={{ minHeight: 75 }}
+          onChange={setNote}
+          title="Note"
+          optionalText="(optional)"
+        />
+
+        {/* Save */}
+        <TextButton
+          text="Save Purchase"
+          onClick={handleSave}
+          disabled={saving}
+          loading={saving}
+        />
+      </BottomSheet>
 
       {/* Supplier Picker */}
       <PickerModal

@@ -1,12 +1,12 @@
 import { supabase } from "@/src/lib/supabase";
 import { useAuthStore } from "@/src/stores/useAuthStore";
-import MessageBox from "@/src/widgets/MessageBox";
 import {
   Inter_400Regular,
   Inter_500Medium,
   Inter_700Bold,
   useFonts,
 } from "@expo-google-fonts/inter";
+import { PortalHost, PortalProvider } from "@gorhom/portal";
 import { Slot, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
@@ -65,9 +65,9 @@ export default function RootLayout() {
   if (!fontsLoaded || isLoading) return null;
 
   return (
-    <>
+    <PortalProvider>
       <Slot />
-      <MessageBox />
-    </>
+      <PortalHost name="bottomsheet" />
+    </PortalProvider>
   );
 }

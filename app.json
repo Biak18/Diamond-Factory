@@ -4,7 +4,7 @@
     "slug": "warehouse_demo",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/cube.png",
     "scheme": "warehousedemo",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -14,17 +14,18 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "foregroundImage": "./assets/images/cube.png",
+        "backgroundImage": "./assets/images/cube.png",
+        "monochromeImage": "./assets/images/cube.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.warehouse_demo.demo"
+      "package": "com.warehouse_demo.demo",
+      "softwareKeyboardLayoutMode": "pan"
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png",
+      "favicon": "./assets/images/cube.png",
       "bundler": "metro"
     },
     "plugins": [
@@ -32,7 +33,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/cube.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
@@ -41,16 +42,17 @@
           }
         }
       ],
-      "expo-font"
+      "expo-font",
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true,
-      "reactCompiler": true
+      "reactCompiler": false
     },
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "cb29d0b9-38d4-40aa-a2fa-e2d31dcfc145"
+        "projectId": "e0284bc1-4c9a-4a54-9455-781c5b6d9ba9"
       }
     }
   }

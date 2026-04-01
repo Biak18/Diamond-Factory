@@ -1,3 +1,4 @@
+import BottomSheet from "@/src/components/BottomSheet";
 import { IconButton } from "@/src/components/IconButton";
 import { SearchBar } from "@/src/components/SearchBar";
 import { TextBox, TextBoxRef } from "@/src/components/TextBox";
@@ -9,16 +10,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Animated,
   FlatList,
-  Modal,
   Pressable,
   RefreshControl,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 // ─── Add Supplier Modal ───────────────────────────────────────────
 function AddSupplierModal({
@@ -53,7 +50,7 @@ function AddSupplierModal({
       handleClose();
       nameInputRef.current?.removeErrorMessage();
     } catch (err: any) {
-      showMessage(err?.message || "Could not save supplier", "error");
+      showMessage("Error saving supplier. Please try again.", "error");
     } finally {
       setSaving(false);
     }
@@ -66,134 +63,59 @@ function AddSupplierModal({
     onClose();
   };
 
-  // const translateY = useRef(new Animated.Value(0)).current;
-
-  // const panResponder = PanResponder.create({
-  //   onStartShouldSetPanResponder: () => true,
-  //   onPanResponderMove: (_, gestureState) => {
-  //     // Only allow dragging down
-  //     if (gestureState.dy > 0) {
-  //       translateY.setValue(gestureState.dy);
-  //     }
-  //   },
-  //   onPanResponderRelease: (_, gestureState) => {
-  //     if (gestureState.dy > 300) {
-  //       Animated.timing(translateY, {
-  //         toValue: 500,
-  //         duration: 200,
-  //         useNativeDriver: true,
-  //       }).start(() => {
-  //         setTimeout(() => {
-  //           translateY.setValue(0); // reset after went off
-  //         }, 100);
-  //         handleClose();
-  //       });
-  //     } else {
-  //       // Snap back
-  //       Animated.spring(translateY, {
-  //         toValue: 0,
-  //         useNativeDriver: true,
-  //       }).start();
-  //     }
-  //   },
-  // });
-
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={handleClose}
-    >
-      <View className="flex-1 justify-end">
-        <Pressable className="flex-1" onPress={handleClose} />
+    <BottomSheet visible={visible} title="Add Supplier" onClose={handleClose}>
+      <TextBox
+        ref={nameInputRef}
+        title="Name"
+        nullable={true}
+        icons="person-outline"
+        value={name}
+        onChange={setName}
+        readonly={saving}
+        placeholder="e.g. John Smith"
+        placeholderColor="#9CA3AF"
+        returnKeyType="next"
+        onSubmitEditing={() => phoneRef.current?.focus()}
+      />
 
-        <Animated.View
-          // style={{
-          //   transform: [{ translateY }],
-          // }}
-          className="bg-white rounded-t-3xl px-6 pt-4 pb-10"
-        >
-          {/* Handle bar */}
-          <View
-            // {...panResponder.panHandlers}
-            className="w-full h-12 absolute top-0 self-center"
-          >
-            <View className="w-12 h-1 bg-gray-200 rounded-full self-center" />
-          </View>
+      <TextBox
+        ref={phoneRef}
+        title="Phone"
+        optionalText="(optional)"
+        icons="call-outline"
+        readonly={saving}
+        value={phone}
+        onChange={setPhone}
+        placeholder="e.g. +95 9876543210"
+        placeholderColor="#9CA3AF"
+        keyboardType="phone-pad"
+        returnKeyType="next"
+        onSubmitEditing={() => companyRef.current?.focus()}
+      />
 
-          {/* Title */}
-          <View className="flex-row items-center justify-between mb-6">
-            <Text className="text-xl font-bold text-dark">Add Supplier</Text>
-            <TouchableOpacity onPress={handleClose}>
-              <Ionicons name="close-circle-outline" size={28} color="#94A3B8" />
-            </TouchableOpacity>
-          </View>
+      <TextBox
+        ref={companyRef}
+        title="Company Name"
+        optionalText="(optional)"
+        icons="business-outline"
+        placeholder="e.g. Diamond Trading Co."
+        placeholderColor="#9CA3AF"
+        value={companyName}
+        onChange={setCompanyName}
+        autoCapitalize="words"
+        readonly={saving}
+        returnKeyType="done"
+        onSubmitEditing={handleSave}
+      />
 
-          <KeyboardAwareScrollView
-            enableOnAndroid={true}
-            enableAutomaticScroll={true}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-          >
-            {/* Name */}
-            <TextBox
-              ref={nameInputRef}
-              title="Name"
-              nullable={true}
-              icons="person-outline"
-              value={name}
-              onChange={setName}
-              readonly={saving}
-              placeholder="e.g. John Smith"
-              placeholderColor="#9CA3AF"
-              returnKeyType="next"
-              onSubmitEditing={() => phoneRef.current?.focus()}
-            />
-
-            {/* Phone */}
-            <TextBox
-              ref={phoneRef}
-              title="Phone"
-              optionalText="(optional)"
-              icons="call-outline"
-              readonly={saving}
-              value={phone}
-              onChange={setPhone}
-              placeholder="e.g. +95 9876543210"
-              placeholderColor="#9CA3AF"
-              keyboardType="phone-pad"
-              returnKeyType="next"
-              onSubmitEditing={() => companyRef.current?.focus()}
-            />
-
-            {/* Company Name */}
-            <TextBox
-              ref={companyRef}
-              title="Company Name"
-              optionalText="(optional)"
-              icons="business-outline"
-              placeholder="e.g. Diamond Trading Co."
-              placeholderColor="#9CA3AF"
-              value={companyName}
-              onChange={setCompanyName}
-              autoCapitalize="words"
-              readonly={saving}
-              returnKeyType="done"
-              onSubmitEditing={handleSave}
-            />
-
-            {/* Save */}
-            <TextButton
-              onClick={handleSave}
-              disabled={saving}
-              loading={saving}
-              text="Save Supplier"
-            />
-          </KeyboardAwareScrollView>
-        </Animated.View>
-      </View>
-    </Modal>
+      <TextButton
+        onClick={handleSave}
+        disabled={saving}
+        loading={saving}
+        text="Save Supplier"
+      />
+    </BottomSheet>
   );
 }
 

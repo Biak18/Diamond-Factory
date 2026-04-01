@@ -1,3 +1,4 @@
+import BottomSheet from "@/src/components/BottomSheet";
 import { IconButton } from "@/src/components/IconButton";
 import { RowPicker, RowPickerRef } from "@/src/components/RowPicker";
 import { SearchBar } from "@/src/components/SearchBar";
@@ -7,11 +8,13 @@ import { TAB_BAR_HEIGHT } from "@/src/constants/layout";
 import { showConfirm, showMessage } from "@/src/lib/utils/dialog";
 import { DiamondSize, usePackageStore } from "@/src/stores/usePackageStore";
 import { Ionicons } from "@expo/vector-icons";
+import { Portal } from "@gorhom/portal";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  BackHandler,
+  Dimensions,
   FlatList,
-  Modal,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -20,7 +23,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 // ─── Sieve Picker Modal ───────────────────────────────────────────
 function SievePickerModal({
@@ -39,94 +42,185 @@ function SievePickerModal({
   onClose: () => void;
 }) {
   const [search, setSearch] = useState("");
+  useEffect(() => {
+    if (!visible) return;
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => {
+      setSearch("");
+      onClose();
+      return true;
+    });
+    return () => sub.remove();
+  }, [visible]);
+  if (!visible) return null;
 
   const filtered = sizes.filter((s) =>
     s.sieve_size.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
-    >
-      <Pressable className="flex-1 bg-black/40" onPress={onClose} />
+    <Portal hostName="bottomsheet">
       <View
-        className="bg-white rounded-t-3xl px-6 pt-4"
-        style={{ maxHeight: "60%" }}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          justifyContent: "flex-end",
+        }}
       >
-        <View className="w-12 h-1 bg-gray-200 rounded-full self-center mb-4" />
+        {/* Backdrop */}
+        <Pressable
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.6)",
+          }}
+          onPress={() => {
+            setSearch("");
+            onClose();
+          }}
+        />
 
-        <Text className="text-lg font-bold text-dark mb-4">{title}</Text>
-
-        {/* Search */}
-        <View className="flex-row items-center bg-surface border border-gray-200 rounded-xl px-4 h-12 mb-3">
-          <Ionicons name="search-outline" size={18} color="#94A3B8" />
-          <TextInput
-            className="flex-1 ml-2 text-base text-dark"
-            placeholder="Search sieve size..."
-            placeholderTextColor="#9CA3AF"
-            value={search}
-            onChangeText={setSearch}
+        {/* Sheet */}
+        <View
+          style={{
+            backgroundColor: "white",
+            borderTopLeftRadius: 24,
+            borderTopRightRadius: 24,
+            paddingHorizontal: 24,
+            paddingTop: 16,
+            paddingBottom: 40,
+            maxHeight: SCREEN_HEIGHT * 0.6,
+          }}
+        >
+          {/* Handle bar */}
+          <View
+            style={{
+              width: 48,
+              height: 4,
+              backgroundColor: "#E2E8F0",
+              borderRadius: 2,
+              alignSelf: "center",
+              marginBottom: 16,
+            }}
           />
-          {search.length > 0 && (
-            <Pressable onPress={() => setSearch("")}>
-              <Ionicons name="close-circle" size={18} color="#94A3B8" />
-            </Pressable>
-          )}
-        </View>
 
-        <ScrollView showsVerticalScrollIndicator={false} className="mb-6">
-          {filtered.map((size) => {
-            const isSelected = selected?.id === size.id;
-            return (
-              <TouchableOpacity
-                key={size.id}
-                className={`flex-row items-center py-3 px-2 rounded-xl mb-1 ${
-                  isSelected ? "bg-primary/10" : ""
-                }`}
-                onPress={() => {
-                  onSelect(size);
-                  setSearch("");
-                  onClose();
-                }}
-              >
-                {/* Sieve size */}
-                <View className="flex-1">
+          {/* Title */}
+          <Text
+            style={{
+              fontSize: 18,
+              fontFamily: "Inter_700Bold",
+              color: "#0F172A",
+              marginBottom: 16,
+            }}
+          >
+            {title}
+          </Text>
+
+          {/* Search */}
+          <View className="flex-row items-center bg-surface border border-gray-200 rounded-xl px-4 h-12 mb-3">
+            <Ionicons name="search-outline" size={18} color="#94A3B8" />
+            <TextInput
+              className="flex-1 ml-2 text-base text-dark"
+              placeholder="Search sieve size..."
+              placeholderTextColor="#9CA3AF"
+              value={search}
+              onChangeText={setSearch}
+            />
+            {search.length > 0 && (
+              <Pressable onPress={() => setSearch("")}>
+                <Ionicons name="close-circle" size={18} color="#94A3B8" />
+              </Pressable>
+            )}
+          </View>
+
+          {/* List */}
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            style={{ marginBottom: 8 }}
+          >
+            {filtered.map((size) => {
+              const isSelected = selected?.id === size.id;
+              return (
+                <TouchableOpacity
+                  key={size.id}
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    paddingVertical: 12,
+                    paddingHorizontal: 8,
+                    borderRadius: 12,
+                    marginBottom: 4,
+                    backgroundColor: isSelected
+                      ? "rgba(37,99,235,0.1)"
+                      : "transparent",
+                  }}
+                  onPress={() => {
+                    onSelect(size);
+                    setSearch("");
+                    onClose();
+                  }}
+                >
+                  {/* Sieve info */}
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        fontFamily: "Inter_500Medium",
+                        color: isSelected ? "#2563EB" : "#0F172A",
+                      }}
+                    >
+                      {size.sieve_size}
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 12,
+                        color: "#94A3B8",
+                        marginTop: 2,
+                      }}
+                    >
+                      {size.p_cts && `P/Cts: ${size.p_cts}`}
+                      {size.diameter_mm && ` · ⌀ ${size.diameter_mm}mm`}
+                    </Text>
+                  </View>
+
+                  {/* Weight */}
                   <Text
-                    className={`text-base font-medium ${
-                      isSelected ? "text-primary" : "text-dark"
-                    }`}
+                    style={{
+                      fontSize: 13,
+                      color: "#94A3B8",
+                      marginRight: 8,
+                    }}
                   >
-                    {size.sieve_size}
+                    {size.weight_per_stone} ct
                   </Text>
-                  <Text className="text-xs text-dark/40 mt-0.5">
-                    {size.p_cts && `P/Cts: ${size.p_cts}`}
-                    {size.diameter_mm && ` · ⌀ ${size.diameter_mm}mm`}
-                  </Text>
-                </View>
 
-                {/* Weight */}
-                <Text className="text-sm text-dark/50 mr-3">
-                  {size.weight_per_stone} ct
+                  {isSelected && (
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={20}
+                      color="#2563EB"
+                    />
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+
+            {filtered.length === 0 && (
+              <View style={{ alignItems: "center", paddingVertical: 40 }}>
+                <Text style={{ fontSize: 16, color: "#94A3B8" }}>
+                  No results found
                 </Text>
-
-                {isSelected && (
-                  <Ionicons name="checkmark-circle" size={20} color="#2563EB" />
-                )}
-              </TouchableOpacity>
-            );
-          })}
-
-          {filtered.length === 0 && (
-            <View className="items-center py-10">
-              <Text className="text-base text-dark/40">No results found</Text>
-            </View>
-          )}
-        </ScrollView>
+              </View>
+            )}
+          </ScrollView>
+        </View>
       </View>
-    </Modal>
+    </Portal>
   );
 }
 
@@ -205,120 +299,79 @@ function AddPackageModal({
 
   return (
     <>
-      <Modal
-        visible={visible}
-        transparent
-        animationType="slide"
-        onRequestClose={handleClose}
-      >
-        <View className="flex-1 justify-end">
-          <Pressable className="flex-1" onPress={handleClose} />
-
-          <View
-            className="bg-white rounded-t-3xl px-6 pt-4 pb-10"
-            style={{ maxHeight: "90%" }}
-          >
-            {/* Handle bar */}
-            <View className="w-12 h-1 bg-gray-200 rounded-full self-center mb-5" />
-
-            {/* Title */}
-            <View className="flex-row items-center justify-between mb-6">
-              <Text className="text-xl font-bold text-dark">Add Package</Text>
-              <TouchableOpacity onPress={handleClose}>
-                <Ionicons
-                  name="close-circle-outline"
-                  size={28}
-                  color="#94A3B8"
-                />
-              </TouchableOpacity>
-            </View>
-
-            <KeyboardAwareScrollView
-              enableOnAndroid={true}
-              enableAutomaticScroll={true}
-              extraScrollHeight={80}
-              keyboardShouldPersistTaps="handled"
-              showsVerticalScrollIndicator={false}
-            >
-              <View className="flex-row items-center gap-2 mb-4">
-                <RowPicker
-                  ref={fromRef}
-                  value={sieveFrom?.sieve_size}
-                  placeholder="From"
-                  onPress={() => setShowFromPicker(true)}
-                  onClear={() => setSieveFrom(null)}
-                  title="Sieve Range"
-                  optionalText="(optional)"
-                  icon="diamond-outline"
-                  toArrow
-                />
-                <RowPicker
-                  ref={toRef}
-                  value={sieveTo?.sieve_size}
-                  placeholder="To"
-                  onPress={() => setShowToPicker(true)}
-                  onClear={() => setSieveTo(null)}
-                  icon="diamond-outline"
-                />
-              </View>
-
-              {/* Package Code */}
-              <TextBox
-                ref={pkgCodeRef}
-                value={packageCode}
-                onChange={setPackageCode}
-                autoCapitalize="characters"
-                placeholderColor="#9CA3AF"
-                placeholder="e.g. 000-2"
-                returnKeyType="next"
-                title="Package Code"
-                icons="layers-outline"
-                nullable
-                onSubmitEditing={() => pkgNameRef.current?.focus()}
-              />
-
-              {/* Package Name */}
-              <TextBox
-                ref={pkgNameRef}
-                value={packageName}
-                onChange={setPackageName}
-                autoCapitalize="words"
-                placeholderColor="#9CA3AF"
-                placeholder="e.g. 000 to 2"
-                returnKeyType="next"
-                title="Package Name"
-                icons="pricetag-outline"
-                nullable
-                onSubmitEditing={() => noteRef.current?.focus()}
-              />
-
-              {/* Note */}
-              <TextBox
-                ref={noteRef}
-                multiline
-                numberOfLines={2}
-                style={{ minHeight: 70 }}
-                value={note}
-                optionalText="(optional)"
-                onChange={setNote}
-                title="Note"
-                placeholderColor="#9CA3AF"
-                placeholder="e.g. Small melee diamonds"
-              />
-
-              {/* Save */}
-              <TextButton
-                text="Save Package"
-                loading={saving}
-                disabled={saving}
-                onClick={handleSave}
-              />
-            </KeyboardAwareScrollView>
-          </View>
+      <BottomSheet visible={visible} title="Add Package" onClose={handleClose}>
+        <View className="flex-row items-center gap-2 mb-4">
+          <RowPicker
+            ref={fromRef}
+            value={sieveFrom?.sieve_size}
+            placeholder="From"
+            onPress={() => setShowFromPicker(true)}
+            onClear={() => setSieveFrom(null)}
+            title="Sieve Range"
+            optionalText="(optional)"
+            icon="diamond-outline"
+            toArrow
+          />
+          <RowPicker
+            ref={toRef}
+            value={sieveTo?.sieve_size}
+            placeholder="To"
+            onPress={() => setShowToPicker(true)}
+            onClear={() => setSieveTo(null)}
+            icon="diamond-outline"
+          />
         </View>
-      </Modal>
 
-      {/* From Picker */}
+        <TextBox
+          ref={pkgCodeRef}
+          value={packageCode}
+          onChange={setPackageCode}
+          autoCapitalize="characters"
+          placeholderColor="#9CA3AF"
+          placeholder="e.g. 000-2"
+          returnKeyType="next"
+          title="Package Code"
+          icons="layers-outline"
+          nullable
+          onSubmitEditing={() => pkgNameRef.current?.focus()}
+        />
+
+        <TextBox
+          ref={pkgNameRef}
+          value={packageName}
+          onChange={setPackageName}
+          autoCapitalize="words"
+          placeholderColor="#9CA3AF"
+          placeholder="e.g. 000 to 2"
+          returnKeyType="next"
+          title="Package Name"
+          icons="pricetag-outline"
+          nullable
+          onSubmitEditing={() => noteRef.current?.focus()}
+        />
+
+        <TextBox
+          ref={noteRef}
+          multiline
+          numberOfLines={2}
+          style={{ minHeight: 70 }}
+          value={note}
+          optionalText="(optional)"
+          onChange={setNote}
+          title="Note"
+          placeholderColor="#9CA3AF"
+          placeholder="e.g. Small melee diamonds"
+        />
+
+        <TextButton
+          text="Save Package"
+          loading={saving}
+          disabled={saving}
+          onClick={handleSave}
+        />
+      </BottomSheet>
+
+      {/* Sieve pickers — also need Portal so they appear above BottomSheet */}
       <SievePickerModal
         visible={showFromPicker}
         title="Select Sieve From"
@@ -328,7 +381,6 @@ function AddPackageModal({
         onClose={() => setShowFromPicker(false)}
       />
 
-      {/* To Picker */}
       <SievePickerModal
         visible={showToPicker}
         title="Select Sieve To"
