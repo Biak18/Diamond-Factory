@@ -5,7 +5,7 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 interface DatePickerProps {
   title?: string;
-  nullabe?: boolean;
+  nullable?: boolean;
   value: Date;
   OnDateChange: (date: Date | null) => void;
   placeholder?: string;
@@ -19,7 +19,7 @@ export interface DatePickerRef {
 }
 
 export const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(
-  ({ value, nullabe, title, OnDateChange, placeholder, readonly }, ref) => {
+  ({ value, nullable, title, OnDateChange, placeholder, readonly }, ref) => {
     const [error, setError] = useState("");
     const [show, setShow] = useState(false);
     useImperativeHandle(ref, () => ({
@@ -31,7 +31,7 @@ export const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(
     return (
       <View>
         <Text className="text-sm font-medium text-dark mb-2">
-          {title} {nullabe && <Text className="text-red-400">*</Text>}
+          {title} {nullable && <Text className="text-red-400">*</Text>}
         </Text>
         <Pressable
           disabled={readonly}
