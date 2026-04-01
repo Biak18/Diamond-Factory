@@ -2,7 +2,6 @@ import { DatePicker, DatePickerRef } from "@/src/components/DatePicker";
 import { RowPicker, RowPickerRef } from "@/src/components/RowPicker";
 import { TextBox, TextBoxRef } from "@/src/components/TextBox";
 import { TextButton } from "@/src/components/TextButton";
-import { ToggleBox } from "@/src/components/ToggleBox";
 import { TAB_BAR_HEIGHT } from "@/src/constants/layout";
 import { useAuthStore } from "@/src/stores/useAuthStore";
 import { usePackageStore } from "@/src/stores/usePackageStore";
@@ -254,16 +253,6 @@ function AddPurchaseModal({
       expectMessageRemover("purdate");
       return;
     }
-    const today = new Date();
-    const selectedDate = new Date(purchaseDate);
-
-    if (selectedDate.setHours(0, 0, 0, 0) > today.setHours(0, 0, 0, 0)) {
-      purchaseDateRef.current?.setErrorMessage(
-        "Purchase date cannot be in the future.",
-      );
-      expectMessageRemover("purdate");
-      return;
-    }
     if (!user?.id) {
       Alert.alert("Error", "User session not found.");
       expectMessageRemover("all");
@@ -431,14 +420,28 @@ function AddPurchaseModal({
               />
 
               {/* Currency Toggle */}
-              <ToggleBox
-                title="Currency"
-                nullable
-                data={["USD", "INR"]}
-                value={currency}
-                currency
-                onChange={(e: any) => setCurrency(e)}
-              />
+              <Text className="text-sm font-medium text-dark mb-2">
+                Currency <Text className="text-red-400">*</Text>
+              </Text>
+              <View className="flex-row bg-surface rounded-xl p-1 mb-4">
+                {(["USD", "INR"] as const).map((c) => (
+                  <TouchableOpacity
+                    key={c}
+                    className={`flex-1 h-12 rounded-xl items-center justify-center flex-row gap-2 ${
+                      currency === c ? "bg-primary" : ""
+                    }`}
+                    onPress={() => setCurrency(c)}
+                  >
+                    <Text
+                      className={`text-base font-bold ${
+                        currency === c ? "text-white" : "text-dark/40"
+                      }`}
+                    >
+                      {c === "USD" ? "🇺🇸 USD" : "🇮🇳 INR"}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
 
               {/* Price per CT + Exchange Rate */}
               <View className="flex-row gap-3 mb-4">
