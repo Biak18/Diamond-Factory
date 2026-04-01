@@ -3,12 +3,12 @@ import { SearchBar } from "@/src/components/SearchBar";
 import { TextBox, TextBoxRef } from "@/src/components/TextBox";
 import { TextButton } from "@/src/components/TextButton";
 import { TAB_BAR_HEIGHT } from "@/src/constants/layout";
+import { showConfirm, showMessage } from "@/src/lib/utils/dialog";
 import { Supplier, useSupplierStore } from "@/src/stores/useSupplierStore";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Animated,
   FlatList,
   Modal,
@@ -53,7 +53,7 @@ function AddSupplierModal({
       handleClose();
       nameInputRef.current?.removeErrorMessage();
     } catch (err: any) {
-      Alert.alert("Error", err?.message || "Could not save supplier.");
+      showMessage(err?.message || "Could not save supplier", "error");
     } finally {
       setSaving(false);
     }
@@ -206,17 +206,8 @@ function SupplierCard({
   onDelete: (id: string) => void;
 }) {
   const handleDelete = () => {
-    Alert.alert(
-      "Delete Supplier",
-      `Are you sure you want to delete "${supplier.name}"?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => onDelete(supplier.id),
-        },
-      ],
+    showConfirm(`Are you sure want to delete ${supplier.name}?`, () =>
+      onDelete(supplier.id),
     );
   };
 

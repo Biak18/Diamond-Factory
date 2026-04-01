@@ -4,12 +4,12 @@ import { SearchBar } from "@/src/components/SearchBar";
 import { TextBox, TextBoxRef } from "@/src/components/TextBox";
 import { TextButton } from "@/src/components/TextButton";
 import { TAB_BAR_HEIGHT } from "@/src/constants/layout";
+import { showConfirm, showMessage } from "@/src/lib/utils/dialog";
 import { DiamondSize, usePackageStore } from "@/src/stores/usePackageStore";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   Modal,
   Pressable,
@@ -183,11 +183,11 @@ function AddPackageModal({
       });
       handleClose();
     } catch (err: any) {
-      Alert.alert(
-        "Error",
+      showMessage(
         err?.message?.includes("unique")
           ? "Package code already exists."
           : err?.message || "Could not save package.",
+        "error",
       );
     } finally {
       setSaving(false);
@@ -357,17 +357,8 @@ function PackageCard({
   onDelete: (id: string) => void;
 }) {
   const handleDelete = () => {
-    Alert.alert(
-      "Delete Package",
-      `Are you sure you want to delete "${pkg.package_code}"?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => onDelete(pkg.id),
-        },
-      ],
+    showConfirm(`Are you sure you want to delete "${pkg.package_code}"?`, () =>
+      onDelete(pkg.id),
     );
   };
 
@@ -462,7 +453,7 @@ export default function PackagesScreen() {
     try {
       await deletePackage(id);
     } catch (err: any) {
-      Alert.alert("Cannot Delete", err?.message || "Could not delete package.");
+      showMessage(err?.message || "Could not delete package.", "error");
     }
   };
 

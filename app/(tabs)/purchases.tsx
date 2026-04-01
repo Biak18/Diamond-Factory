@@ -3,6 +3,7 @@ import { RowPicker, RowPickerRef } from "@/src/components/RowPicker";
 import { TextBox, TextBoxRef } from "@/src/components/TextBox";
 import { TextButton } from "@/src/components/TextButton";
 import { TAB_BAR_HEIGHT } from "@/src/constants/layout";
+import { showMessage } from "@/src/lib/utils/dialog";
 import { useAuthStore } from "@/src/stores/useAuthStore";
 import { usePackageStore } from "@/src/stores/usePackageStore";
 import { Purchase, usePurchaseStore } from "@/src/stores/usePurchaseStore";
@@ -11,7 +12,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   Modal,
   Pressable,
@@ -254,9 +254,8 @@ function AddPurchaseModal({
       return;
     }
     if (!user?.id) {
-      Alert.alert("Error", "User session not found.");
+      showMessage("User session not found.", "error");
       expectMessageRemover("all");
-
       return;
     }
 
@@ -276,7 +275,7 @@ function AddPurchaseModal({
       });
       handleClose();
     } catch (err: any) {
-      Alert.alert("Error", err?.message || "Could not save purchase.");
+      showMessage(err?.message || "Could not save purchase.", "error");
     } finally {
       setSaving(false);
     }
