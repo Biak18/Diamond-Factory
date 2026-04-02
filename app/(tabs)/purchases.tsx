@@ -636,9 +636,20 @@ function PurchaseCard({ purchase }: { purchase: Purchase }) {
             {purchase.purchase_code}
           </Text>
         </View>
-        <Text className="text-xs text-dark/40">
+        <View className="flex-row gap-1 items-center">
+          <Ionicons name="calendar-outline" size={10} color="#2563EB" />
+          <Text className="text-xs text-dark font-bold">
+            {purchase.purchase_date} (
+            {new Date(purchase.purchase_date).toLocaleDateString("en-US", {
+              month: "short",
+            })}
+            )
+          </Text>
+        </View>
+        {/* <Text className="text-xs text-dark font-bold">
+
           {formatDate(purchase.purchase_date)}
-        </Text>
+        </Text> */}
       </View>
 
       {/* Supplier + Package */}

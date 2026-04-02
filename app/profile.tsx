@@ -1,3 +1,4 @@
+import BottomSheet from "@/src/components/BottomSheet";
 import { supabase } from "@/src/lib/supabase";
 import { showConfirm, showMessage } from "@/src/lib/utils/dialog";
 import { useAuthStore } from "@/src/stores/useAuthStore";
@@ -5,8 +6,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import {
   ActivityIndicator,
-  Modal,
-  Pressable,
   ScrollView,
   Text,
   TextInput,
@@ -75,53 +74,36 @@ function EditNameModal({
   };
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
-    >
-      <Pressable className="flex-1 bg-black/40" onPress={onClose} />
-      <View className="bg-white rounded-t-3xl px-6 pt-4 pb-10">
-        <View className="w-12 h-1 bg-gray-200 rounded-full self-center mb-5" />
-
-        <View className="flex-row items-center justify-between mb-6">
-          <Text className="text-xl font-bold text-dark">Edit Name</Text>
-          <TouchableOpacity onPress={onClose}>
-            <Ionicons name="close-circle-outline" size={28} color="#94A3B8" />
-          </TouchableOpacity>
-        </View>
-
-        <Text className="text-sm font-medium text-dark mb-2">Full Name</Text>
-        <View className="flex-row items-center bg-surface border border-gray-200 rounded-xl px-4 h-14 mb-8">
-          <Ionicons name="person-outline" size={20} color="#2563EB" />
-          <TextInput
-            className="flex-1 ml-3 text-base text-dark"
-            value={name}
-            onChangeText={setName}
-            autoCapitalize="words"
-            autoFocus
-            returnKeyType="done"
-            onSubmitEditing={handleSave}
-          />
-        </View>
-
-        <TouchableOpacity
-          className={`h-14 rounded-xl items-center justify-center ${
-            saving ? "bg-primary/60" : "bg-primary"
-          }`}
-          onPress={handleSave}
-          disabled={saving}
-          activeOpacity={0.8}
-        >
-          {saving ? (
-            <ActivityIndicator color="white" />
-          ) : (
-            <Text className="text-white text-base font-bold">Save</Text>
-          )}
-        </TouchableOpacity>
+    <BottomSheet visible={visible} title="Edit Name" onClose={onClose}>
+      <Text className="text-sm font-medium text-dark mb-2">Full Name</Text>
+      <View className="flex-row items-center bg-surface border border-gray-200 rounded-xl px-4 h-14 mb-8">
+        <Ionicons name="person-outline" size={20} color="#2563EB" />
+        <TextInput
+          className="flex-1 ml-3 text-base text-dark"
+          value={name}
+          onChangeText={setName}
+          autoCapitalize="words"
+          autoFocus
+          returnKeyType="done"
+          onSubmitEditing={handleSave}
+        />
       </View>
-    </Modal>
+
+      <TouchableOpacity
+        className={`h-14 rounded-xl items-center justify-center mb-2 ${
+          saving ? "bg-primary/60" : "bg-primary"
+        }`}
+        onPress={handleSave}
+        disabled={saving}
+        activeOpacity={0.8}
+      >
+        {saving ? (
+          <ActivityIndicator color="white" />
+        ) : (
+          <Text className="text-white text-base font-bold">Save</Text>
+        )}
+      </TouchableOpacity>
+    </BottomSheet>
   );
 }
 

@@ -5,11 +5,11 @@ import {
   BackHandler,
   Dimensions,
   Pressable,
-  ScrollView,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -72,6 +72,7 @@ export default function BottomSheet({
             paddingTop: 16,
             paddingBottom: 40,
             maxHeight: SCREEN_HEIGHT * 0.92,
+            // minHeight: SCREEN_HEIGHT * 0.5,
           }}
         >
           {/* Handle bar */}
@@ -110,12 +111,16 @@ export default function BottomSheet({
           </View>
 
           {/* Content */}
-          <ScrollView
+          <KeyboardAwareScrollView
+            enableOnAndroid={true}
+            enableAutomaticScroll={true}
+            extraScrollHeight={80}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
+            bounces={false}
           >
             {children}
-          </ScrollView>
+          </KeyboardAwareScrollView>
         </View>
       </View>
     </Portal>

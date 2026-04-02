@@ -38,11 +38,7 @@ function PurchaseCard({ item }: { item: StockDetail }) {
           </Text>
         </View>
         <View className="flex-row gap-1 items-center">
-          <Ionicons
-            name="calendar-outline"
-            size={10}
-            color="rgb(15 23 42 / 0.4)"
-          />
+          <Ionicons name="calendar-outline" size={10} color="#2563EB" />
           <Text className="text-xs text-dark font-bold">
             {item.purchase_date} (
             {new Date(item.purchase_date).toLocaleDateString("en-US", {
