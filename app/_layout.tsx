@@ -1,5 +1,6 @@
 import { supabase } from "@/src/lib/supabase";
 import { useAuthStore } from "@/src/stores/useAuthStore";
+import MessageBox from "@/src/widgets/MessageBox";
 import {
   Inter_400Regular,
   Inter_500Medium,
@@ -67,6 +68,7 @@ export default function RootLayout() {
   return (
     <PortalProvider>
       <Slot />
+      <MessageBox />
       <PortalHost name="bottomsheet" />
     </PortalProvider>
   );
