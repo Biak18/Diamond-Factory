@@ -116,7 +116,7 @@ export default function SignInScreen() {
 
           <View className="flex-row justify-center mt-6">
             <Text className="text-base text-gray-500">No account yet? </Text>
-            <Link href="/(auth)/sign-up" asChild>
+            <Link href="/(auth)/sign-up" replace asChild>
               <Pressable>
                 <Text className="text-base font-bold text-primary">
                   Sign Up

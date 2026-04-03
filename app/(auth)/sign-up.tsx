@@ -3,9 +3,9 @@ import { TextButton } from "@/src/components/TextButton";
 import { supabase } from "@/src/lib/supabase";
 import { showMessage } from "@/src/lib/utils/dialog";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { useRef, useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -224,9 +224,13 @@ export default function SignUpScreen() {
             <Text className="text-base text-dark/60">
               Already have an account?{" "}
             </Text>
-            <TouchableOpacity onPress={() => router.push("/(auth)/sign-in")}>
-              <Text className="text-base text-primary font-bold">Sign In</Text>
-            </TouchableOpacity>
+            <Link href="/(auth)/sign-in" replace asChild>
+              <Pressable>
+                <Text className="text-base font-bold text-primary">
+                  Sign In
+                </Text>
+              </Pressable>
+            </Link>
           </View>
         </View>
       </KeyboardAwareScrollView>
