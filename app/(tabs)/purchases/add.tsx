@@ -475,10 +475,8 @@ export default function AddPurchaseScreen() {
             value={weightCt}
             onChange={setWeightCt}
             keyboardType="decimal-pad"
-            placeholder="e.g. 100.000"
-            placeholderColor="#9CA3AF"
             nullable
-            optionalText="(CT)"
+            optionalText="(Ct)"
             optionalTextColor="black"
           />
 
@@ -509,11 +507,9 @@ export default function AddPurchaseScreen() {
             <TextBox
               readonly={saving}
               ref={priceRef}
-              title="Price / CT"
+              title="Price / Ct"
               value={pricePerCt}
               onChange={setPricePerCt}
-              placeholder="0.00"
-              placeholderColor="#9CA3AF"
               keyboardType="decimal-pad"
               icons="cash-outline"
               nullable
@@ -526,7 +522,6 @@ export default function AddPurchaseScreen() {
               value={exchangeRate}
               onChange={setExchangeRate}
               keyboardType="decimal-pad"
-              placeholder="0.00"
               icons="swap-horizontal-outline"
             />
           </View>
@@ -566,8 +561,6 @@ export default function AddPurchaseScreen() {
             value={note}
             readonly={saving}
             multiline
-            placeholder="e.g. Purchased from Mumbai supplier"
-            placeholderColor="#9CA3AF"
             numberOfLines={2}
             style={{ minHeight: 75 }}
             onChange={setNote}

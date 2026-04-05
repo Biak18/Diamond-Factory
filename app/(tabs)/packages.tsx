@@ -1,6 +1,7 @@
 import BottomSheet from "@/src/components/BottomSheet";
+import { CheckBox } from "@/src/components/CheckBox";
 import { IconButton } from "@/src/components/IconButton";
-import { RowPicker, RowPickerRef } from "@/src/components/RowPicker";
+import { RowPickerRef } from "@/src/components/RowPicker";
 import { SearchBar } from "@/src/components/SearchBar";
 import { TextBox, TextBoxRef } from "@/src/components/TextBox";
 import { TextButton } from "@/src/components/TextButton";
@@ -126,8 +127,6 @@ function SievePickerModal({
             <Ionicons name="search-outline" size={18} color="#94A3B8" />
             <TextInput
               className="flex-1 ml-2 text-base text-dark"
-              placeholder="Search sieve size..."
-              placeholderTextColor="#9CA3AF"
               value={search}
               onChangeText={setSearch}
             />
@@ -236,13 +235,16 @@ function AddPackageModal({
 
   const [packageCode, setPackageCode] = useState("");
   const [packageName, setPackageName] = useState("");
-  const [sieveFrom, setSieveFrom] = useState<DiamondSize | null>(null);
-  const [sieveTo, setSieveTo] = useState<DiamondSize | null>(null);
+  const [sieveFrom, setSieveFrom] = useState("");
+  const [sieveTo, setSieveTo] = useState("");
+  // const [sieveFrom, setSieveFrom] = useState<DiamondSize | null>(null);
+  // const [sieveTo, setSieveTo] = useState<DiamondSize | null>(null);
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
+  const [giaCheck, setGiaCheck] = useState(false);
 
-  const [showFromPicker, setShowFromPicker] = useState(false);
-  const [showToPicker, setShowToPicker] = useState(false);
+  // const [showFromPicker, setShowFromPicker] = useState(false);
+  // const [showToPicker, setShowToPicker] = useState(false);
 
   const pkgNameRef = useRef<TextBoxRef>(null);
   const pkgCodeRef = useRef<TextBoxRef>(null);
@@ -271,8 +273,10 @@ function AddPackageModal({
       await addPackage({
         package_code: packageCode.trim().toUpperCase(),
         package_name: packageName.trim(),
-        sieve_from: sieveFrom?.sieve_size,
-        sieve_to: sieveTo?.sieve_size,
+        sieve_from: sieveFrom,
+        sieve_to: sieveTo,
+        // sieve_from: sieveFrom?.sieve_size,
+        // sieve_to: sieveTo?.sieve_size,
         note: note.trim() || undefined,
       });
       handleClose();
@@ -291,44 +295,65 @@ function AddPackageModal({
   const handleClose = () => {
     setPackageCode("");
     setPackageName("");
-    setSieveFrom(null);
-    setSieveTo(null);
+    setSieveFrom("");
+    setSieveTo("");
+    // setSieveFrom(null);
+    // setSieveTo(null);
     setNote("");
     onClose();
   };
 
+  useEffect(() => {}, []);
+
   return (
     <>
       <BottomSheet visible={visible} title="Add Package" onClose={handleClose}>
-        <View className="flex-row items-center gap-2 mb-4">
-          <RowPicker
+        <View className="flex-row items-center gap-2">
+          <TextBox
+            title="Sieve Range"
+            optionalText="(From)"
+            value={sieveFrom}
+            icons="diamond-outline"
+            onChange={setSieveFrom}
+            keyboardType="number-pad"
+          />
+          {/* <RowPicker
             ref={fromRef}
             value={sieveFrom?.sieve_size}
-            placeholder="From"
             onPress={() => setShowFromPicker(true)}
             onClear={() => setSieveFrom(null)}
             title="Sieve Range"
             optionalText="(optional)"
             icon="diamond-outline"
             toArrow
+          /> */}
+          <TextBox
+            title="Sieve Range"
+            optionalText="(To)"
+            value={sieveTo}
+            onChange={setSieveTo}
+            icons="diamond-outline"
+            keyboardType="number-pad"
           />
-          <RowPicker
+          {/* <RowPicker
             ref={toRef}
             value={sieveTo?.sieve_size}
-            placeholder="To"
             onPress={() => setShowToPicker(true)}
             onClear={() => setSieveTo(null)}
             icon="diamond-outline"
-          />
+          /> */}
         </View>
+        <CheckBox
+          onCheck={(e) => setGiaCheck(e)}
+          value={giaCheck}
+          text="GIA certified"
+          optionalText="(Test)"
+        />
 
         <TextBox
           ref={pkgCodeRef}
-          value={packageCode}
-          onChange={setPackageCode}
+          value={sieveFrom || sieveTo ? sieveFrom + " : " + sieveTo : ""}
           autoCapitalize="characters"
-          placeholderColor="#9CA3AF"
-          placeholder="e.g. 000-2"
           returnKeyType="next"
           title="Package Code"
           icons="layers-outline"
@@ -341,8 +366,6 @@ function AddPackageModal({
           value={packageName}
           onChange={setPackageName}
           autoCapitalize="words"
-          placeholderColor="#9CA3AF"
-          placeholder="e.g. 000 to 2"
           returnKeyType="next"
           title="Package Name"
           icons="pricetag-outline"
@@ -359,8 +382,6 @@ function AddPackageModal({
           optionalText="(optional)"
           onChange={setNote}
           title="Note"
-          placeholderColor="#9CA3AF"
-          placeholder="e.g. Small melee diamonds"
         />
 
         <TextButton
@@ -372,7 +393,7 @@ function AddPackageModal({
       </BottomSheet>
 
       {/* Sieve pickers — also need Portal so they appear above BottomSheet */}
-      <SievePickerModal
+      {/* <SievePickerModal
         visible={showFromPicker}
         title="Select Sieve From"
         sizes={sizes}
@@ -388,7 +409,7 @@ function AddPackageModal({
         selected={sieveTo}
         onSelect={setSieveTo}
         onClose={() => setShowToPicker(false)}
-      />
+      /> */}
     </>
   );
 }

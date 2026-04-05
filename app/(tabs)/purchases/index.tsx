@@ -65,7 +65,7 @@ function PurchaseCard({ purchase }: { purchase: Purchase }) {
         <View className="items-center">
           <Text className="text-xs text-dark/40">Weight</Text>
           <Text className="text-sm font-bold text-dark mt-0.5">
-            {purchase.weight_ct} CT
+            {purchase.weight_ct} Ct
           </Text>
         </View>
 

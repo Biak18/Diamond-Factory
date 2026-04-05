@@ -26,10 +26,10 @@ function PackageCard({ item }: { item: PackageStock }) {
       <View className="flex-row items-center justify-between mb-3">
         <View className="flex-1 mr-3">
           <Text className="text-lg font-bold text-dark">
-            {item.package_name}
+            {item.package_code}
           </Text>
           <Text className="text-sm text-dark/40 mt-0.5">
-            {item.package_code}
+            {item.package_name}
           </Text>
         </View>
 
@@ -39,7 +39,7 @@ function PackageCard({ item }: { item: PackageStock }) {
           <Text className="text-xl font-bold text-primary">
             {Number(item.current_stock_ct).toFixed(2)}
           </Text>
-          <Text className="text-xs text-primary/60">CT</Text>
+          <Text className="text-xs text-primary/60">Ct</Text>
         </View>
       </View>
 
@@ -52,7 +52,7 @@ function PackageCard({ item }: { item: PackageStock }) {
           <View>
             <Text className="text-xs text-dark/40">Total IN</Text>
             <Text className="text-base font-bold text-green-600">
-              +{Number(item.total_in_ct).toFixed(2)} CT
+              +{Number(item.total_in_ct).toFixed(2)} Ct
             </Text>
           </View>
         </View>
@@ -66,7 +66,7 @@ function PackageCard({ item }: { item: PackageStock }) {
           <View>
             <Text className="text-xs text-dark/40">Total OUT</Text>
             <Text className="text-base font-bold text-red-400">
-              -{Number(item.total_out_ct).toFixed(2)} CT
+              -{Number(item.total_out_ct).toFixed(2)} Ct
             </Text>
           </View>
         </View>
@@ -171,7 +171,7 @@ export default function HomeScreen() {
           <Text className="text-sm text-primary/70">Total Stock</Text>
           <Text className="text-3xl font-bold text-primary mt-0.5">
             {totalStock.toFixed(2)}{" "}
-            <Text className="text-lg font-medium">CT</Text>
+            <Text className="text-lg font-medium">Ct</Text>
           </Text>
           <Text className="text-xs text-primary/50 mt-1">
             Across {packageStock.length} package

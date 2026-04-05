@@ -13,7 +13,7 @@ import { IconButton } from "./IconButton";
 
 interface TextBoxProps {
   value: any;
-  onChange: (value: any) => void;
+  onChange?: (value: any) => void;
   title?: string;
   style?: StyleProp<TextStyle>;
   icons?: React.ComponentProps<typeof Ionicons>["name"];
@@ -80,7 +80,7 @@ export const TextBox = forwardRef<TextBoxRef, TextBoxProps>(
       focus: () => inputRef.current?.focus(),
     }));
     return (
-      <View className="flex-1 mb-4">
+      <View className="flex-1 mb-3">
         <Text style={{ fontFamily: "Inter", fontSize: 13, marginBottom: 3 }}>
           {title}{" "}
           {optionalText && (
