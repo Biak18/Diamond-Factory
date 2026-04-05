@@ -236,6 +236,7 @@ export default function AddPurchaseScreen() {
   const [pricePerCt, setPricePerCt] = useState("");
   const [exchangeRate, setExchangeRate] = useState("");
   const [purchaseDate, setPurchaseDate] = useState<Date>(new Date());
+  const [piece, setPiece] = useState(0);
   // const [purchaseDate, setPurchaseDate] = useState(
   //   new Date().toISOString().split("T")[0],
   // );
@@ -491,19 +492,29 @@ export default function AddPurchaseScreen() {
             />
           </View>
         )} */}
-
-          <TextBox
-            readonly={saving}
-            ref={weightRef}
-            title="Weight"
-            icons="scale-outline"
-            value={weightCt}
-            onChange={setWeightCt}
-            keyboardType="decimal-pad"
-            nullable
-            optionalText="(Ct)"
-            optionalTextColor="black"
-          />
+          <View className="flex-row gap-2">
+            <TextBox
+              readonly={saving}
+              ref={weightRef}
+              title="Weight"
+              icons="scale-outline"
+              value={weightCt}
+              onChange={setWeightCt}
+              keyboardType="decimal-pad"
+              nullable
+              optionalText="(Ct)"
+              optionalTextColor="black"
+            />
+            <TextBox
+              readonly={saving}
+              optionalText="(Pcs)"
+              title="Pieces"
+              icons="diamond-sharp"
+              value={piece}
+              onChange={setPiece}
+              keyboardType="number-pad"
+            />
+          </View>
 
           <Text className="text-sm font-medium text-dark mb-2">
             Currency <Text className="text-red-400">*</Text>
