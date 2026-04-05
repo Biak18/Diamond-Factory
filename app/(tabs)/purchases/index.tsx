@@ -1,4 +1,7 @@
+import { DatePicker } from "@/src/components/DatePicker";
+import { IconButton } from "@/src/components/IconButton";
 import { TAB_BAR_HEIGHT } from "@/src/constants/layout";
+import { showMessage } from "@/src/lib/utils/dialog";
 import { Purchase, usePurchaseStore } from "@/src/stores/usePurchaseStore";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -70,7 +73,7 @@ function PurchaseCard({ purchase }: { purchase: Purchase }) {
         </View>
 
         <View className="items-center">
-          <Text className="text-xs text-dark/40">Price / CT</Text>
+          <Text className="text-xs text-dark/40">Price / Ct</Text>
           <Text className="text-sm font-bold text-dark mt-0.5">
             {purchase.currency === "USD" ? "$" : "₹"}
             {formatNumber(purchase.price_per_ct)}
@@ -135,6 +138,10 @@ export default function PurchasesScreen() {
   const [currencyFilter, setCurrencyFilter] = useState<"ALL" | "USD" | "INR">(
     "ALL",
   );
+  const [dateFrom, setDateFrom] = useState(
+    new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+  );
+  const [dateTo, setDateTo] = useState(new Date());
 
   useEffect(() => {
     fetchPurchases();
@@ -159,6 +166,14 @@ export default function PurchasesScreen() {
   const totalINR = purchases
     .filter((p) => p.currency === "INR")
     .reduce((sum, p) => sum + p.price_per_ct, 0);
+
+  const handleSearch = () => {
+    if (dateFrom > dateTo) {
+      showMessage("Invalid date range", "error");
+      return;
+    }
+    // search Logic here
+  };
 
   return (
     <View className="flex-1 bg-surface">
@@ -218,6 +233,24 @@ export default function PurchasesScreen() {
               </Text>
             </TouchableOpacity>
           ))}
+        </View>
+        {/*Date Box */}
+        <View className="flex-row gap-2 items-center">
+          <DatePicker
+            title="From"
+            value={dateFrom}
+            OnDateChange={(e: any) => setDateFrom(e)}
+          />
+          <DatePicker
+            title="To"
+            value={dateTo}
+            OnDateChange={(e: any) => setDateTo(e)}
+          />
+          <IconButton
+            style={{ marginTop: 15 }}
+            icon="search"
+            onClick={handleSearch}
+          />
         </View>
 
         {/* Search */}

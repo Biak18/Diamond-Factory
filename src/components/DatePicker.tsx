@@ -29,8 +29,8 @@ export const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(
       removeErrorMessage: () => setError(""),
     }));
     return (
-      <View>
-        <Text className="text-sm font-medium text-dark mb-2">
+      <View className="flex-1">
+        <Text className="text-sm font-medium text-dark mb-1">
           {title} {nullable && <Text className="text-red-400">*</Text>}
         </Text>
         <Pressable
@@ -54,6 +54,7 @@ export const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(
             </Pressable>
           )}
         </Pressable>
+
         <DateTimePickerModal
           isVisible={show}
           mode="date"

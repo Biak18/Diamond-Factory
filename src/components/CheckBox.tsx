@@ -19,7 +19,7 @@ export const CheckBox = ({
       <Pressable onPress={() => onCheck?.(!value)}>
         <Ionicons name={value ? "checkbox" : "checkbox-outline"} size={23} />
       </Pressable>
-      <Text className="text-sm font-medium  ml-1">{text}</Text>{" "}
+      <Text className="text-sm font-medium  ml-1">{text}</Text>
       {optionalText && (
         <Text className="text-sm ml-1 text-dark/40">{optionalText}</Text>
       )}

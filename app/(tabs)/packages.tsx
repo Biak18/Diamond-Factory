@@ -303,8 +303,6 @@ function AddPackageModal({
     onClose();
   };
 
-  useEffect(() => {}, []);
-
   return (
     <>
       <BottomSheet visible={visible} title="Add Package" onClose={handleClose}>
@@ -347,7 +345,6 @@ function AddPackageModal({
           onCheck={(e) => setGiaCheck(e)}
           value={giaCheck}
           text="GIA certified"
-          optionalText="(Test)"
         />
 
         <TextBox

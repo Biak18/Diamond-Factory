@@ -241,6 +241,9 @@ export default function AddPurchaseScreen() {
   // );
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
+  const [giaReportNumber, setGitReportNumber] = useState("");
+  const [color, setColor] = useState("");
+  const [clarity, setClarity] = useState("");
 
   // Picker visibility
   const [showSupplierPicker, setShowSupplierPicker] = useState(false);
@@ -457,7 +460,7 @@ export default function AddPurchaseScreen() {
             nullable
             value={
               selectedPackage
-                ? `${selectedPackage.package_code} · ${selectedPackage.package_name}`
+                ? `${selectedPackage.package_code} (${selectedPackage.package_name})`
                 : ""
             }
             title="Package"
@@ -466,6 +469,28 @@ export default function AddPurchaseScreen() {
             onPress={() => setShowPackagePicker(true)}
             onClear={() => setSelectedPackage(null)}
           />
+          {/* {selectedPackage. && (
+          <View>
+            <TextBox
+              icons="receipt-outline"
+              value={giaReportNumber}
+              onChange={setGitReportNumber}
+              title="GIA Report Number"
+            />
+            <TextBox
+              value={color}
+              onChange={setColor}
+              title="Color"
+              icons="color-fill"
+            />
+            <TextBox
+              value={clarity}
+              onChange={setClarity}
+              title="Clarity"
+              icons="diamond-sharp"
+            />
+          </View>
+        )} */}
 
           <TextBox
             readonly={saving}
